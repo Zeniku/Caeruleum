@@ -1,6 +1,8 @@
-# Mindustry Java Mod Template
-A Java Mindustry mod template that works on Android and PC. The Kotlin version of this mod can be seen [here](https://github.com/Anuken/MindustryKotlinModTemplate).
+# Caeruleum 
+A Java Mindustry mod
+adds whatever i add
 
+# How To Build
 ## Building for Desktop Testing
 
 1. Install JDK **17**.
