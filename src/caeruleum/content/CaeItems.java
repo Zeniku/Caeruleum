@@ -13,11 +13,11 @@ public class CaeItems {
         }};
         rubrarium = new Item("rubrarium", Color.valueOf("964253")){{
             hardness = 3;
-            cost = 1f;
+            cost = 1.2f;
         }};
         virideaurum = new Item("virideaurum", Color.valueOf("3CA370")){{
-            hardness = 3;
-            cost = 1f;
+            hardness = 4;
+            cost = 1.5f;
         }};
         lonsdaleite = new Item("lonsdaleite", Color.valueOf("473B78")){{
             hardness = 3;
