@@ -30,6 +30,7 @@ public class CaeruleumMod extends Mod{
     public void loadContent(){
         CaeItems.load();
         CaeBlocks.load();
+        CaePlanets.load();
     }
 
 }
