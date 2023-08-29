@@ -6,6 +6,7 @@ import arc.math.geom.Vec3;
 import arc.struct.ObjectMap;
 import arc.util.Tmp;
 import arc.util.noise.Simplex;
+import caeruleum.utils.math.CaeMath;
 import caeruleum.utils.noise.RidgeNoise;
 import mindustry.content.Blocks;
 import mindustry.maps.generators.BaseGenerator;
@@ -17,8 +18,8 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
     public static boolean alt = false;
 
     BaseGenerator basegen = new BaseGenerator();
-    float scl = 5f;
-    float waterOffset = 0.08f;
+    float scl = 5.04f;
+    float waterOffset = 0.07f;
     boolean genLakes = false;
 
     Block[][] arr =
@@ -54,12 +55,12 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
 
     float rawHeight(Vec3 position){
         position = Tmp.v33.set(position).scl(scl);
-        float noise1 = RidgeNoise.noise3d(seed, 4, 0.5f, 3f, 0, 0.51f, 0.52f, position.x, position.y, position.z) * 1.3f;
-        float noise2 = Simplex.noise3d(seed, 7, 0.44f, 1f/3f, position.x, position.y, position.z) * 0.3f;
+        float noise1 = RidgeNoise.noise3d(seed, 7, 0.7f, 4f, 0f, 0.6f, 1f/4f, position.x, position.y, position.z);
+        float noise2 = Simplex.noise3d(seed, 7, 0.5f, 1f/3f, position.x, position.y, position.z);
         //TODO ocean
-        float fault3 = Simplex.noise3d(seed + 1, 3, 0.37f, 1f/2f, position.x, position.y, position.z) * 0.25f;
-        float tempHeight = Mathf.clamp(noise1 + noise2);
-        return (((Mathf.pow(tempHeight, 2f) - 0.225f) + waterOffset) / (1f + waterOffset)) - Mathf.pow(fault3, 2f); 
+        //float fault3 = Simplex.noise3d(seed + 1, 3, 0.37f, 1f/2f, position.x, position.y, position.z) * 0.1f;
+        float tempHeight = /*CaeMath.smoothMax(noise1 * 1.5f, noise2 * 2f, 1.2f)*/ noise1;
+        return (((Mathf.pow(tempHeight, 2.33f)) + waterOffset) / (1f + waterOffset)) /*- Mathf.pow(fault3, 2f)*/;
     }
 
     Block getBlock(Vec3 position){
