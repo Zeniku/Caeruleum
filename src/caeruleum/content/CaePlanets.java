@@ -41,8 +41,8 @@ public class CaePlanets {
             };
             iconColor = Color.valueOf("7d4dff");
             atmosphereColor = Color.valueOf("363f9a");
-            atmosphereRadIn = 0.04f;
-            atmosphereRadOut = 0.05f;
+            atmosphereRadIn = 0.07f;
+            atmosphereRadOut = 0.25f;
             startSector = 15;
             alwaysUnlocked = true;
             landCloudColor = Pal.spore.cpy().a(0.5f);
