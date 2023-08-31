@@ -55,11 +55,11 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
 
     float rawHeight(Vec3 position){
         position = Tmp.v33.set(position).scl(scl);
-        float noise1 = RidgeNoise.noise3d(seed, 7, 0.7f, 4f, 0f, 0.6f, 1f/4f, position.x, position.y, position.z);
+        float noise1 = RidgeNoise.noise3d(seed, 7, 0.7f, 5f, 0f, 0.7f, 1f/4f, position.x, position.y, position.z);
         float noise2 = Simplex.noise3d(seed, 7, 0.5f, 1f/3f, position.x, position.y, position.z);
         //TODO ocean
         //float fault3 = Simplex.noise3d(seed + 1, 3, 0.37f, 1f/2f, position.x, position.y, position.z) * 0.1f;
-        float tempHeight = CaeMath.smoothMax(noise1 * 1.5f, noise2 * 0.5f, 1.2f) /*noise1*/;
+        float tempHeight = CaeMath.smoothMax(noise1 * 1.5f, noise2 * 0.67f, 1.2f) /*noise1*/;
         return (((Mathf.pow(tempHeight, 2.33f)) + waterOffset) / (1f + waterOffset)) /*- Mathf.pow(fault3, 2f)*/;
     }
 
