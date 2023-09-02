@@ -20,28 +20,10 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
 
     BaseGenerator basegen = new BaseGenerator();
     float scl = 5.04f;
-    float waterOffset = 0.2f;
+    float waterOffset = 0.3f;
     boolean genLakes = false;
 
-    Block[] terrain = {CaeBlocks.deepAquafluent ,CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite,Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice};
-    Block[][] arr = {
-        {Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, CaeBlocks.bluonixite},
-        {Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, CaeBlocks.bluonixite, CaeBlocks.bluonixite},
-        {Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.salt, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, CaeBlocks.bluonixite, CaeBlocks.bluonixite},
-        {Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, CaeBlocks.bluonixite},
-        {Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, CaeBlocks.bluonixite, CaeBlocks.bluonixite},
-        {Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.salt, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, CaeBlocks.bluonixite, CaeBlocks.bluonixite},
-        {Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.salt, Blocks.salt, Blocks.salt, Blocks.darksand, CaeBlocks.bluonixite, CaeBlocks.bluonixite, CaeBlocks.bluonixite, Blocks.snow, Blocks.iceSnow, Blocks.ice},
-        {Blocks.deepwater, Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.salt, Blocks.darksand, Blocks.darksand, Blocks.basalt, Blocks.snow, Blocks.snow, Blocks.snow, Blocks.snow, Blocks.ice},
-        {Blocks.deepwater, Blocks.water, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.snow, Blocks.ice, Blocks.snow, Blocks.ice},
-        {Blocks.deepwater, Blocks.darksandWater, Blocks.darksand, Blocks.darksand, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, Blocks.snow, Blocks.basalt, Blocks.basalt, Blocks.basalt, Blocks.ice, Blocks.snow, Blocks.ice},
-        {CaeBlocks.deepAquafluent, CaeBlocks.bluonixiteWater, Blocks.darksand, Blocks.darksand, Blocks.basalt, CaeBlocks.lazurigrass, Blocks.basalt, Blocks.hotrock, Blocks.basalt, Blocks.ice, Blocks.snow, Blocks.ice, Blocks.ice},
-        {Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, Blocks.snow, Blocks.basalt, Blocks.basalt, Blocks.ice, Blocks.snow, Blocks.ice, Blocks.ice},
-        {Blocks.darksandWater, Blocks.darksand, Blocks.darksand, CaeBlocks.lazurigrass, Blocks.ice, Blocks.ice, Blocks.snow, Blocks.snow, Blocks.snow, Blocks.snow, Blocks.ice, Blocks.ice, Blocks.ice},
-        {CaeBlocks.deepAquafluent, CaeBlocks.bluonixiteWater, Blocks.darksand, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, Blocks.ice, Blocks.ice, Blocks.snow, Blocks.snow, Blocks.ice, Blocks.ice, Blocks.ice, Blocks.ice},
-        {CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, Blocks.darksand, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice, Blocks.ice, Blocks.ice, Blocks.ice, Blocks.ice},
-        {Blocks.darksandWater, Blocks.darksand, Blocks.snow, Blocks.ice, Blocks.iceSnow, Blocks.snow, Blocks.snow, Blocks.snow, Blocks.ice, Blocks.ice, Blocks.ice, Blocks.ice, Blocks.ice}
-    };
+    Block[] terrain = {CaeBlocks.deepAquafluent ,CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite,Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice};
 
     ObjectMap<Block, Block> dec = ObjectMap.of(
         CaeBlocks.lazurigrass, CaeBlocks.lazurigrass,
@@ -55,16 +37,19 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
         CaeBlocks.lazurigrass, Blocks.shale
     );
 
-    float water = 2f / arr[0].length;
+    float water = 1.3f / terrain.length;
 
+    float crater(Vec3 position){
+        return 1f;
+    }
     float rawHeight(Vec3 position){
         position = Tmp.v33.set(position).scl(scl);
         float noise1 = RidgeNoise.noise3d(seed, 7, 0.7f, 5f, 0f, 0.7f, 1f/4f, position.x, position.y, position.z);
         float noise2 = Simplex.noise3d(seed, 7, 0.5f, 1f/3f, position.x, position.y, position.z);
         //TODO ocean
-        float fault3 = Mathf.clamp(Simplex.noise3d(seed + 3, 7, 0.6f, 1f/3f, position.x, position.y, position.z));
+        float fault3 = Mathf.clamp(Simplex.noise3d(seed + 3, 7, 0.5f, 1f/3f, position.x, position.y, position.z));
         float tempHeight = CaeMath.smoothMax(noise1 * 1.5f, CaeMath.smoothMin(noise2, (fault3 * -1f) - 0.3f, 1.3f) * 0.67f, 1.3f);
-        return (((Mathf.pow(tempHeight, 2.33f)) + waterOffset) / (1f + waterOffset)) /*- Mathf.pow(fault3, 2f)*/;
+        return (float)((((Mathf.pow(tempHeight, 2.33f)) + waterOffset) / (1f + waterOffset)) - 0.05f) /*- Mathf.pow(fault3, 2f)*/;
     }
 
     Block getBlock(Vec3 position){
