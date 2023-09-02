@@ -23,7 +23,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
     float waterOffset = 0.3f;
     boolean genLakes = false;
 
-    Block[] terrain = {CaeBlocks.deepAquafluent ,CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite,Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice};
+    Block[] terrain = {CaeBlocks.deepAquafluent, CaeBlocks.deepAquafluent, CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite,Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice};
 
     ObjectMap<Block, Block> dec = ObjectMap.of(
         CaeBlocks.lazurigrass, CaeBlocks.lazurigrass,
@@ -37,7 +37,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
         CaeBlocks.lazurigrass, Blocks.shale
     );
 
-    float water = 2f / terrain.length;
+    float water = 1.5f / terrain.length;
 
     float rawHeight(Vec3 position){
         position = Tmp.v33.set(position).scl(scl);
@@ -45,8 +45,12 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
         float noise2 = Simplex.noise3d(seed, 7, 0.5f, 1f/3f, position.x, position.y, position.z);
         //TODO ocean
         float fault3 = Mathf.clamp(Simplex.noise3d(seed + 3, 7, 0.5f, 1f/3f, position.x, position.y, position.z));
-        float tempHeight = CaeMath.smoothMax(noise1 * 1.5f, CaeMath.smoothMin(noise2, (fault3 * -1f) - 0.3f, 1.3f) * 0.67f, 1.3f);
-        return (float)((((Mathf.pow(tempHeight, 2.33f)) + waterOffset) / (1f + waterOffset))) /*- Mathf.pow(fault3, 2f)*/;
+        float tempHeight = CaeMath.smoothMax(noise1 * 1.5f, noise2 * 0.67f, 1.3f);
+        float height = (float)((((Mathf.pow(tempHeight, 2.33f)) + waterOffset) / (1f + waterOffset)) - 0.2f);
+
+        height *= (height > 1f)? 2.5f : 1f;
+        height *= (height < 0)? 1.5f : 1f;
+        return (float) height /*- Mathf.pow(fault3, 2f)*/;
     }
 
     Block getBlock(Vec3 position){
