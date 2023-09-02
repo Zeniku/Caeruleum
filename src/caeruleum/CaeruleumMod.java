@@ -17,7 +17,7 @@ public class CaeruleumMod extends Mod{
             //show dialog upon startup
             Time.runTask(10f, () -> {
                 BaseDialog dialog = new BaseDialog("frog");
-                dialog.cont.add("this is a wip mod").row();
+                dialog.cont.add("This is a wip mod \nEverything in this mod is experimental\nand constantly changing").center().row();
                 //mod sprites are prefixed with the mod name (this mod is called 'example-java-mod' in its config)
                 dialog.cont.image(Core.atlas.find("caeruleum-icon")).pad(20f).row();
                 dialog.cont.button("I see", dialog::hide).size(100f, 50f);

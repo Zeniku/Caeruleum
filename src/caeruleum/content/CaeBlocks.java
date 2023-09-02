@@ -1,8 +1,11 @@
 package caeruleum.content;
 
 import arc.graphics.Color;
+import caeruleum.world.blocks.storage.PowerCore;
 import mindustry.content.*;
+import mindustry.game.Team;
 import mindustry.world.Block;
+import mindustry.world.Tile;
 import mindustry.world.blocks.environment.*;
 import mindustry.graphics.CacheLayer;
 
@@ -12,7 +15,8 @@ public class CaeBlocks {
     
     aquafluent, deepAquafluent,
     bush, blueFlower, blueTendrils, 
-    caeruleumOre, rubrariumOre, virideaurumOre;
+    caeruleumOre, rubrariumOre, virideaurumOre,
+    miniCore;
 
     public static void load(){
         bluonixite = new Floor("bluonixite-stone"){{
@@ -71,7 +75,7 @@ public class CaeBlocks {
             variants = 3;
             lazurigrass.asFloor().decoration = this;
         }};
-        bush = new SeaBush("bluBush"){{
+        bush = new Seaweed("bluBush"){{
             variants = 3;
         }};
         lazurigrassWall = new StaticWall("lazurigrass-wall"){{
@@ -90,5 +94,14 @@ public class CaeBlocks {
             oreThreshold = 0.853f;
             oreScale = 24.004762f;
         }};
+        miniCore = new PowerCore("miniCore"){{
+            size = 2;
+            itemCapacity = 300;
+        }
+        @Override
+            public boolean canPlaceOn(Tile tile, Team team, int rotation) {
+                return true;
+            }
+        };
     }
 }
