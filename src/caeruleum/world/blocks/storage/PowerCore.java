@@ -8,7 +8,7 @@ import arc.util.Time;
 
 public class PowerCore extends CoreBlock {
 
-  public float powerProduction = 5;
+  public float powerProduction = 300;
   public float effectChance =  0.65f;
   public float steamgenWarmdown = 0.002f;
   public float heatLoss = 0.001f;
