@@ -23,7 +23,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
     float waterOffset = 0.3f;
     boolean genLakes = false;
 
-    Block[] terrain = {CaeBlocks.deepAquafluent ,CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite,Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice};
+    Block[] terrain = {CaeBlocks.deepAquafluent ,CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite,Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice};
 
     ObjectMap<Block, Block> dec = ObjectMap.of(
         CaeBlocks.lazurigrass, CaeBlocks.lazurigrass,
@@ -37,11 +37,8 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
         CaeBlocks.lazurigrass, Blocks.shale
     );
 
-    float water = 1.3f / terrain.length;
+    float water = 2f / terrain.length;
 
-    float crater(Vec3 position){
-        return 1f;
-    }
     float rawHeight(Vec3 position){
         position = Tmp.v33.set(position).scl(scl);
         float noise1 = RidgeNoise.noise3d(seed, 7, 0.7f, 5f, 0f, 0.7f, 1f/4f, position.x, position.y, position.z);
