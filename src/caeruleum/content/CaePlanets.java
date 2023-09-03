@@ -2,11 +2,12 @@ package caeruleum.content;
 
 import arc.graphics.Color;
 import caeruleum.graphics.g3d.CaeHexMesh;
+import caeruleum.graphics.g3d.HexData;
 import caeruleum.maps.planet.CaeruleumPlanetGenerator;
 import mindustry.content.Items;
 import mindustry.content.Planets;
 import mindustry.game.Team;
-import mindustry.graphics.g3d.HexMesh;
+import mindustry.graphics.Shaders;
 import mindustry.graphics.g3d.HexSkyMesh;
 import mindustry.graphics.g3d.MultiMesh;
 import mindustry.graphics.g3d.NoiseMesh;
@@ -21,8 +22,14 @@ public class CaePlanets {
             generator = new CaeruleumPlanetGenerator();
             meshLoader = () -> new MultiMesh(
                     //new HexMesh(this, 6), 
-                    //new NoiseMesh(this, 1,5, CaeBlocks.deepAquafluent.mapColor.cpy().mul(0.9f).a(0.55f), 1.007f,1, 0.0001f, 1f,1f),
-                    new CaeHexMesh(this, null, 5, 1.03f, CaeBlocks.deepAquafluent.mapColor.cpy().mul(0.9f).a(0.78f))
+                    new CaeHexMesh(new HexData(this, null, Shaders.planet, CaeBlocks.deepAquafluent.mapColor.cpy().mul(0.9f).a(0.55f)){{
+                        divisions = 5;
+                        radius = 1.007f;
+                    }}),
+                    new CaeHexMesh(new HexData(this, this.generator, Shaders.clouds, CaeBlocks.deepAquafluent.mapColor.cpy().mul(0.9f).a(0.8f)){{
+                        radius = 1.007f;
+                        divisions = 5;
+                    }})
             );
             cloudMeshLoader = () -> new MultiMesh(
                     new HexSkyMesh(this, 11, 0.15f, 0.13f, 5, new Color().set(Color.valueOf("363f9a")).mul(0.9f).a(0.75f), 2, 0.45f, 0.9f, 0.38f),
