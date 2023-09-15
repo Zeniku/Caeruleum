@@ -44,12 +44,14 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
         float noise1 = RidgeNoise.noise3d(seed, 7, 0.7f, 5f, 0f, 0.7f, 1f/4f, position.x, position.y, position.z);
         float noise2 = Simplex.noise3d(seed, 7, 0.2f, 1f/3f, position.x, position.y, position.z);
         //TODO ocean
-        float fault3 = Mathf.clamp(Simplex.noise3d(seed + 3, 7, 0.5f, 1f/3f, position.x, position.y, position.z));
-        float tempHeight = CaeMath.smoothMax(noise1 * 1.1f, CaeMath.smoothMin(noise2, (fault3 * -1f) - 0.3f, 1.3f) * 0.67f, 1.3f);
-        float height = (float)((Math.pow(tempHeight, 2.33f) + waterOffset) / (1f + waterOffset)) - 0.06f;
 
-        height *= (height < 0.25f)? -0.25f : 1f;
-        return (float) height /*- Mathf.pow(fault3, 2f)*/;
+        float fault3 = Simplex.noise3d(seed + 3, 7, 0.5f, 1f/3f, position.x, position.y, position.z);
+        float tempHeight = CaeMath.smoothMax(noise1 * 1.2f - 0.005f, CaeMath.smoothMin(noise2, (fault3 * -1f) - 0.3f, 1.3f) * 0.67f, 1.3f);
+        float hHeight = (float)(Math.max(CaeMath.smoothMax(noise1 * 1.2f - 0.005f, (noise2 * 0.67f) - 0.3f, 1.3f), Math.pow(fault3, 2.2f)));
+        float height = (float)((Math.pow(tempHeight, 2.44f) + waterOffset) / (1f + waterOffset)) - 0.06f;
+
+        float tHeight = (height < 0.15f)? (float)(height - Math.pow(fault3, 2.2f)) : height;
+        return (float) tHeight /*- Mathf.pow(fault3, 2f)*/;
     }
 
     Block getBlock(Vec3 position){
