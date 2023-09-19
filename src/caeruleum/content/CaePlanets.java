@@ -55,7 +55,7 @@ public class CaePlanets {
                 r.showSpawns = false;
             };
             iconColor = Color.valueOf("7d4dff");
-            atmosphereColor = Color.valueOf("363f9a");
+            atmosphereColor = CaeBlocks.deepAquafluent.mapColor;
             atmosphereRadIn = 0.07f;
             atmosphereRadOut = 0.25f;
             startSector = 15;
