@@ -11,6 +11,7 @@ import mindustry.type.Planet;
 
 public class CaeHexMesh extends HexMesh {
     public boolean ren = true;
+    public boolean depth = false;
     public HexData data;
     public CaeHexMesh(Planet planet, int divisions){
         super(planet, planet.generator, divisions, Shaders.planet);
@@ -24,14 +25,14 @@ public class CaeHexMesh extends HexMesh {
     };
     @Override
     public void render(PlanetParams params, Mat3D projection, Mat3D transform){
-        //Gl.depthMask(false);
+        if (this.depth) Gl.depthMask(false);
         preRender(params);
         shader.bind();
         shader.setUniformMatrix4("u_proj", projection.val);
         shader.setUniformMatrix4("u_trans", transform.val);
         shader.apply();
         mesh.render(shader, Gl.triangles);
-        //Gl.depthMask(true);
+        if(this.depth) Gl.depthMask(true);
     }
      @Override 
      public void preRender(PlanetParams params){
