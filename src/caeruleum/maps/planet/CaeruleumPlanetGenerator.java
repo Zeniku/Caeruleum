@@ -46,10 +46,10 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
         //TODO ocean
         float fault3 = Mathf.clamp(Simplex.noise3d(seed + 3, 7, 0.5f, 1f/3f, position.x, position.y, position.z));
         float tempHeight = CaeMath.smoothMax(noise1 * 1.1f, CaeMath.smoothMin(noise2, (fault3 * -1f) - 0.3f, 1.3f) * 0.67f, 1.3f);
-        float height = (float)((Math.pow(tempHeight, 2.33f) + waterOffset) / (1f + waterOffset)) - 0.06f;
+        float height = (float)((Math.pow(tempHeight, 2.36f) + waterOffset) / (1f + waterOffset)) - 0.06f;
 
-        height *= (height < 0.25f)? -0.25f : 1f;
-        return (float) height /*- Mathf.pow(fault3, 2f)*/;
+        float depth = (height < 0.15f)? CaeMath.smoothMin(height * -1.04f, height, 1.3f, height * -0.25f, height) : height;
+        return (float) depth /*- Mathf.pow(fault3, 2f)*/;
     }
 
     Block getBlock(Vec3 position){
@@ -65,6 +65,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator{
         height = Mathf.clamp(height);
 
         float tar = Simplex.noise3d(seed, 4, 0.55f, 1f/2f, position.x, position.y + 999f, position.z) * 0.3f + Tmp.v31.dst(0, 0, 1f) * 0.2f;
+        //int index = (int)(Mathf.lerp(0, terrain.length - 1, height * terrain.length));
         Block res = terrain[Mathf.clamp((int)(height * terrain.length), 0, terrain.length - 1)];
 
         //Block res = arr[Mathf.clamp((int)(temp * arr.length), 0, arr[0].length - 1)][Mathf.clamp((int)(height * arr[0].length), 0, arr[0].length - 1)];

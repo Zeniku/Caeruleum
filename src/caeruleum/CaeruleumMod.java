@@ -2,6 +2,7 @@ package caeruleum;
 
 import arc.*;
 import arc.util.*;
+import caeruleum.graphics.CaeShaders;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.ui.dialogs.*;
@@ -28,6 +29,7 @@ public class CaeruleumMod extends Mod{
 
     @Override
     public void loadContent(){
+        //CaeShaders.init();
         CaeItems.load();
         CaeBlocks.load();
         CaePlanets.load();
