@@ -19,7 +19,7 @@ import arc.util.noise.Ridged;
 import arc.util.noise.Simplex;
 import caeruleum.content.CaeBlocks;
 import caeruleum.utils.math.CaeMath;
-import caeruleum.utils.noise.RidgeNoise;
+import caeruleum.utils.noise.CaeNoise;
 import mindustry.ai.Astar;
 import mindustry.ai.BaseRegistry;
 import mindustry.content.Blocks;
@@ -43,16 +43,23 @@ import static mindustry.Vars.state;
 public class CaeruleumPlanetGenerator extends PlanetGenerator {
     public int seed = 0;
     public static boolean alt = false;
-
+    public float oceanFloorDepth = 1.3f, oceanFloorSmoothing = 1.3f, oceanDepthMultiplier = 0.5f;
     BaseGenerator basegen = new BaseGenerator();
-    float scl = 5.04f;
+    float scl = 5f;
     float waterOffset = 0.3f;
     boolean genLakes = false;
-
-    Block[] terrain = {CaeBlocks.deepAquafluent, CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, Blocks.darksand, CaeBlocks.lazurigrass, Blocks.iceSnow, Blocks.snow, Blocks.ice};
+    //Block[] terrain = {CaeBlocks.deepAquafluent, CaeBlocks.lazurigrass, Blocks.ice};
+    Block[] terrain = {
+            //ocean
+            CaeBlocks.deepAquafluent, CaeBlocks.aquafluent,
+            //shoreline
+            CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, Blocks.darksand,
+            //middle stuff
+            CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass,
+            //peaks
+            Blocks.iceSnow, Blocks.iceSnow, Blocks.snow, Blocks.snow, Blocks.ice, Blocks.ice};
 
     ObjectMap<Block, Block> dec = ObjectMap.of(
-
             CaeBlocks.bluonixiteWater, Blocks.darksandWater
     );
 
@@ -61,20 +68,16 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
             CaeBlocks.lazurigrass, Blocks.shale
     );
 
-    float water = 1.5f / terrain.length;
+    float water = 2f / terrain.length;
 
     float rawHeight(Vec3 position) {
         position = Tmp.v33.set(position).scl(scl);
-        float noise1 = RidgeNoise.noise3d(seed, 7, 0.7f, 5f, 0f, 0.7f, 1f / 4f, position.x, position.y, position.z);
-        float noise2 = Simplex.noise3d(seed, 7, 0.2f, 1f / 3f, position.x, position.y, position.z);
-        //TODO ocean
-        float fault3 = Mathf.clamp(Simplex.noise3d(seed + 3, 7, 0.5f, 1f / 3f, position.x, position.y, position.z));
-        float tempHeight = CaeMath.smoothMax(noise1 * 1.1f, CaeMath.smoothMin(noise2, (fault3 * -1f) - 0.3f, 1.3f) * 0.67f, 1.3f);
-        float height = (float) ((Math.pow(tempHeight, 2.33f) + waterOffset) / (1f + waterOffset)) - 0.06f;
 
-        height *= (height < 0.25f) ? -0.25f : 1f;
-        return (float) height /*- Mathf.pow(fault3, 2f)*/;
-    }
+        float mountainMask = Mathf.clamp( 1f - (Mathf.pow(CaeNoise.noise3d(seed, 5, 0.4f, 1f/2.5f, position) - 0.16f, 2f) * 1.1f));
+        float mountainShape = CaeNoise.ridgeNoise3d(seed, 2, 1.3f, 4f, 0f, 1.2f, 1f / 3.2f, position);
+        float finalHeight = (mountainShape * mountainMask);
+        return (float) finalHeight;
+    };
 
     @Override
     public void generateSector(Sector sector) {
@@ -163,7 +166,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
     @Override
     public float getHeight(Vec3 position) {
         float height = rawHeight(position);
-        return Math.max(height, water - 1f);
+        return height;
     }
         @Override
         protected void generate() {
