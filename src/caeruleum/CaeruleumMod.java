@@ -2,7 +2,6 @@ package caeruleum;
 
 import arc.*;
 import arc.util.*;
-import caeruleum.graphics.CaeShaders;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.ui.dialogs.*;
@@ -21,7 +20,7 @@ public class CaeruleumMod extends Mod{
                 dialog.cont.add("This is a wip mod \nEverything in this mod is experimental\nand constantly changing").center().row();
                 //mod sprites are prefixed with the mod name (this mod is called 'example-java-mod' in its config)
                 dialog.cont.image(Core.atlas.find("caeruleum-icon")).pad(20f).row();
-                dialog.cont.button("I see", dialog::hide).size(100f, 50f);
+                dialog.cont.button("you suck", dialog::hide).size(100f, 50f);
                 dialog.show();
             });
         });

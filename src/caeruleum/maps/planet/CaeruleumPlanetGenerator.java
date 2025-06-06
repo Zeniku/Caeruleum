@@ -2,6 +2,7 @@ package caeruleum.maps.planet;
 
 import arc.graphics.Color;
 import arc.math.Angles;
+import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.Rand;
 import arc.math.geom.Geometry;
@@ -58,7 +59,21 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
             CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass,
             //peaks
             Blocks.iceSnow, Blocks.iceSnow, Blocks.snow, Blocks.snow, Blocks.ice, Blocks.ice};
+    
+    Vec3 crater = new Vec3(0, 0f,1f);
 
+    float craterRadius = 0.39f;
+    float craterDepth = 1f;
+    
+    Block [] craterTerrain = {
+        Blocks.slag, 
+        Blocks.magmarock,
+        Blocks.craters, 
+        Blocks.craters, 
+        Blocks.charr
+    };
+
+    
     ObjectMap<Block, Block> dec = ObjectMap.of(
             CaeBlocks.bluonixiteWater, Blocks.darksandWater
     );
@@ -69,15 +84,33 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
     );
 
     float water = 2f / terrain.length;
+    boolean withinCrater(Vec3 position, float r){
+        return position.within(crater, craterRadius + r);
+    };
+
+    boolean withinCrater(Vec3 position){
+        return withinCrater(position, 0f);
+    };
 
     float rawHeight(Vec3 position) {
-        position = Tmp.v33.set(position).scl(scl);
 
-        float mountainMask = Mathf.clamp( 1f - (Mathf.pow(CaeNoise.noise3d(seed, 5, 0.4f, 1f/2.5f, position) - 0.16f, 2f) * 1.1f));
-        float mountainShape = CaeNoise.ridgeNoise3d(seed, 2, 1.3f, 4f, 0f, 1.2f, 1f / 3.2f, position);
-        float finalHeight = (mountainShape * mountainMask);
-        return (float) finalHeight;
+        Vec3 pos = Tmp.v33.set(position).scl(scl);
+        float mountainMask = Mathf.clamp( 1f - (Mathf.pow(CaeNoise.noise3d(seed, 5, 0.4f, 1f/2.5f, pos) - 0.16f, 2f) * 1.1f));
+        float mountainShape = CaeNoise.ridgeNoise3d(seed, 2, 1.3f, 4f, 0f, 1.2f, 1f / 3.2f, pos);
+        float res = (mountainShape * mountainMask);
+
+        float craterDist = position.dst(crater);
+
+      if(withinCrater(position)){
+        float n = CaeNoise.noise3d(0, 8.4d, 0.4d, 0.27d, position) * (craterRadius / 4f);
+        float x  = Interp.pow2Out.apply(1f - (craterDist / craterRadius));
+        float craterShape = craterDepth * x + (1f - x) * n;
+        return res - craterShape;
+      }
+
+      return res;
     };
+
 
     @Override
     public void generateSector(Sector sector) {
@@ -128,20 +161,24 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
 
     Block getBlock(Vec3 position) {
         float height = rawHeight(position);
-        Tmp.v31.set(position);
-        position = Tmp.v33.set(position).scl(scl);
-        float rad = scl;
-        float temp = Mathf.clamp(Math.abs(position.y * 2f) / (rad));
-        float tnoise = Simplex.noise3d(seed, 7, 0.56, 1f / 3f, position.x, position.y + 999f, position.z);
 
-        temp = Mathf.lerp(temp, tnoise, 0.5f);
+        Tmp.v31.set(position);
+        if(withinCrater(position)){
+            float mask = CaeNoise.noise3d(seed, 5, 0.4f, 1f/2.5f, position);
+            int index = Mathf.clamp((int) (height * craterTerrain.length), 0, craterTerrain.length - 1);
+            if(mask > 0.5){
+                return craterTerrain[2];
+            }
+            return craterTerrain[index];
+        }
+        position = Tmp.v33.set(position).scl(scl);
+
         height *= 1.2f;
         height = Mathf.clamp(height);
 
         float tar = Simplex.noise3d(seed, 4, 0.55f, 1f / 2f, position.x, position.y + 999f, position.z) * 0.3f + Tmp.v31.dst(0, 0, 1f) * 0.2f;
         Block res = terrain[Mathf.clamp((int) (height * terrain.length), 0, terrain.length - 1)];
-
-        //Block res = arr[Mathf.clamp((int)(temp * arr.length), 0, arr[0].length - 1)][Mathf.clamp((int)(height * arr[0].length), 0, arr[0].length - 1)];
+        
         if (tar > 0.5f) {
             return tars.get(res, res);
         } else {
@@ -228,8 +265,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                                     other.setBlock(Blocks.air);
                                     if (Mathf.within(x, y, rad - 1) && !other.floor().isLiquid) {
                                         Floor floor = other.floor();
-                                        //TODO does not respect tainted floors
-                                        other.setFloor((Floor) (floor == Blocks.sand || floor == Blocks.salt ? Blocks.sandWater : Blocks.darksandTaintedWater));
+                                        other.setFloor((Floor) (floor == Blocks.sand || floor == Blocks.salt ? Blocks.sandWater : CaeBlocks.bluonixiteWater));
                                     }
                                 }
                             }
@@ -371,7 +407,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                     //ignore pre-existing liquids
                     if (!(floor == Blocks.ice || floor == Blocks.iceSnow || floor == Blocks.snow || floor.asFloor().isLiquid)) {
                         floor = spore ?
-                                (deep ? Blocks.taintedWater : Blocks.darksandTaintedWater) :
+                                (deep ? CaeBlocks.bluonixiteWater : Blocks.darksandWater) :
                                 (deep ? Blocks.water :
                                         (floor == Blocks.sand || floor == Blocks.salt ? Blocks.sandWater : Blocks.darksandWater));
                     }
@@ -398,7 +434,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                         }
                     }
 
-                    floor = floor == Blocks.darksandTaintedWater ? Blocks.taintedWater : Blocks.water;
+                    floor = floor == Blocks.darksandWater ? CaeBlocks.bluonixiteWater : Blocks.water;
                 }
             });
 
@@ -423,7 +459,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                             }
                         }
 
-                        floor = floor == Blocks.water ? Blocks.deepwater : Blocks.taintedWater;
+                        floor = floor == Blocks.water ? Blocks.deepwater : CaeBlocks.bluonixiteWater;
                     }
                 });
             }
@@ -519,7 +555,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                     float noise = noise(x + 782, y, 5, 0.75f, 260f, 1f);
                     if (noise > 0.67f && !roomseq.contains(e -> Mathf.within(x, y, e.x, e.y, 14))) {
                         if (noise > 0.72f) {
-                            floor = noise > 0.78f ? Blocks.taintedWater : (floor == Blocks.sand ? Blocks.sandWater : Blocks.darksandTaintedWater);
+                            floor = noise > 0.78f ? CaeBlocks.bluonixiteWater : (floor == Blocks.sand ? Blocks.sandWater : CaeBlocks.bluonixiteWater);
                         } else {
                             floor = (floor == Blocks.sand ? floor : Blocks.darksand);
                         }

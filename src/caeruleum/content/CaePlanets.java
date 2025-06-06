@@ -20,7 +20,7 @@ public class CaePlanets {
     public static Planet caeruleumPlanet;
     
     public static void load(){
-        caeruleumPlanet = new Planet("caeruleum", Planets.sun, 1f, 2){{
+        caeruleumPlanet = new Planet("caeruleum", Planets.sun, 1f, 3){{
             generator = new CaeruleumPlanetGenerator();
             meshLoader = () -> new HexMesh(this, 6);
             cloudMeshLoader = () -> new MultiMesh(
@@ -39,7 +39,7 @@ public class CaePlanets {
             //doesn't play well with configs
             prebuildBase = false;
             ruleSetter = r -> {
-                r.waveTeam = Team.crux;
+                r.waveTeam = Team.blue;
                 r.placeRangeCheck = false;
                 r.showSpawns = false;
             };

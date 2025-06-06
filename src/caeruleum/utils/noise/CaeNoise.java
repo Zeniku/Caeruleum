@@ -4,6 +4,9 @@ import arc.math.geom.Vec3;
 import arc.util.Log;
 import arc.util.noise.Ridged;
 import arc.util.noise.Simplex;
+import caeruleum.utils.math.CaeMath;
+import arc.math.Interp;
+import arc.math.Mathf;
 
 public class CaeNoise {
 
@@ -38,4 +41,5 @@ public class CaeNoise {
     public static float noise3d(int seed, double octaves, double persistance, double scale, Vec3 vec){
         return Simplex.noise3d(seed, octaves, persistance, scale, vec.x, vec.y, vec.z);
     };
+
 };
