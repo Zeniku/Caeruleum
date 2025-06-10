@@ -1,13 +1,24 @@
 package caeruleum.content;
 
 import arc.graphics.Color;
-import caeruleum.world.blocks.storage.PowerCore;
+import caeruleum.world.blocks.defense.*;
+import caeruleum.world.blocks.storage.*;
+import caeruleum.world.blocks.defense.turrets.*;
 import mindustry.content.*;
+import mindustry.entities.pattern.ShootAlternate;
+import mindustry.entities.pattern.ShootPattern;
+import mindustry.entities.pattern.ShootSummon;
 import mindustry.game.Team;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.*;
+import mindustry.world.blocks.production.GenericCrafter;
+import mindustry.world.draw.DrawFrames;
 import mindustry.graphics.CacheLayer;
+import mindustry.type.Category;
+import mindustry.type.ItemStack;
+
+import static mindustry.type.ItemStack.*;
 
 public class CaeBlocks { 
     public static Block 
@@ -16,6 +27,15 @@ public class CaeBlocks {
     aquafluent, deepAquafluent,
     bush, blueFlower, blueTendrils, 
     caeruleumOre, rubrariumOre, virideaurumOre,
+    //walls
+    lonsdaleiteWall, lonsdaleiteWallLarge,
+    //turrets
+    heavenlyStrike,	praefector,
+    //defense
+    statusEffectProjector, tesla,
+    //Production
+    lonsdaleiteCompressor,
+
     miniCore;
 
     public static void load(){
@@ -94,6 +114,87 @@ public class CaeBlocks {
             oreThreshold = 0.853f;
             oreScale = 24.004762f;
         }};
+        
+        statusEffectProjector = new StatusEffectProjector("statusEffectProjector"){{
+            statusFxEnemies = CaeFx.flameBurst;
+            healEffect = CaeFx.healWave;
+            size = 3;
+            health = 900;
+            requirements(Category.effect, with(Items.titanium, 200, Items.plastanium, 100, Items.silicon, 200, Items.graphite, 300));
+            consumePower(300f/60f);	
+        }};
+
+        tesla = new Tesla("tesla"){{
+            hitEffect = CaeFx.spark;
+            size = 3;
+            health = 1500;
+            requirements(Category.effect, with(Items.titanium, 150, Items.plastanium, 150, CaeItems.lonsdaleite, 100, Items.silicon, 200, Items.graphite, 300));
+            consumePower(300f/60f);
+        }};
+
+        lonsdaleiteCompressor = new GenericCrafter("lonsdaleite-compressor"){{
+            size = 3;
+            hasPower = true;
+            hasItems = true;
+            hasLiquids = false;
+            craftTime = 45;
+            craftEffect = Fx.producesmoke;
+            update = true;
+            itemCapacity = 30;
+            consumePower(0.7f);
+            consumeItem(Items.graphite, 20);
+
+            drawer = new DrawFrames(){{
+            frames = 4;
+        }};
+
+            outputItem = new ItemStack(CaeItems.lonsdaleite, 1);
+            requirements(Category.crafting, with(Items.copper, 100, Items.lead, 150, Items.silicon, 250, Items.titanium, 120, Items.graphite, 80));
+        }};
+
+        heavenlyStrike = new FractalTurret("heavenlyStrike"){{
+            health = 1540;
+            recoil = 0;
+            shootType = CaeBullets.mediumSword;
+            range = (shootType.lifetime * shootType.speed) / 1.5f;
+            shoot = new ShootSummon(0f, 0f, range, 10f){{
+                shots = 3;
+            }};
+            size = 4;
+            reload = 20f;
+            requirements(Category.turret, with(CaeItems.lonsdaleite, 150, Items.titanium, 200, Items.lead, 280));
+        }};
+
+        praefector = new DisabledPredictTurret("praefector"){{
+            health = 1280;
+            recoil = 2;
+            shoot = new ShootAlternate(){{
+            shots = 2;
+        }};
+            size = 4;
+            reload = 15f;
+            shootType = CaeBullets.mediumOverseer;
+            range = (shootType.lifetime * shootType.speed) / 1.5f;
+            requirements(Category.turret, with(CaeItems.lonsdaleite, 100, Items.titanium, 150, Items.lead, 180));
+        }};
+
+        lonsdaleiteWall = new DRWall("lonsdaleiteWall"){{
+            dRChance = 15f;
+            dRPercentage = 20f;
+            health = 520;
+            insulated = true;
+            requirements(Category.defense, with(CaeItems.lonsdaleite, 6, Items.phaseFabric, 6));
+        }};
+
+        lonsdaleiteWallLarge = new DRWall("lonsdaleiteWallLarge"){{
+            size = 2;
+            dRChance = 15f;
+            dRPercentage = 45f;
+            health = 2800;
+            insulated = true;
+            requirements(Category.defense, with(CaeItems.lonsdaleite, 24, Items.phaseFabric, 24));
+        }};
+
         miniCore = new PowerCore("miniCore"){{
             size = 2;
             itemCapacity = 300;

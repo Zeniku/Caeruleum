@@ -29,6 +29,8 @@ public class CaeruleumMod extends Mod{
     @Override
     public void loadContent(){
         CaeItems.load();
+        CaeBullets.load();
+        CaeUnits.load();
         CaeBlocks.load();
         CaePlanets.load();
     }
