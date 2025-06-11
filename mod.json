@@ -1,0 +1,9 @@
+{
+    "displayName": "Caeruleum",
+    "description": "Adds a planet where you suffer",
+    "version": "v1.0",
+    "minGameVersion": "146",
+    "author": "Zeniku",
+    "java": true,
+    "main": "caeruleum.Caeruleum"
+}
