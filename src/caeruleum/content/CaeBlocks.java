@@ -121,7 +121,8 @@ public class CaeBlocks {
             size = 3;
             health = 900;
             requirements(Category.effect, with(Items.titanium, 200, Items.plastanium, 100, Items.silicon, 200, Items.graphite, 300));
-            consumePower(300f/60f);	
+            consumePower(300f/60f);
+            consumeItems(with(CaeItems.rubrarium, 5f));
         }};
 
         tesla = new Tesla("tesla"){{
@@ -129,7 +130,8 @@ public class CaeBlocks {
             size = 3;
             health = 1500;
             requirements(Category.effect, with(Items.titanium, 150, Items.plastanium, 150, CaeItems.lonsdaleite, 100, Items.silicon, 200, Items.graphite, 300));
-            consumePower(300f/60f);
+            consumePower(300f/60f); 
+            consumeItems(with(CaeItems.caeruleum, 5f));
         }};
 
         lonsdaleiteCompressor = new GenericCrafter("lonsdaleite-compressor"){{
@@ -198,6 +200,7 @@ public class CaeBlocks {
         miniCore = new PowerCore("miniCore"){{
             size = 2;
             itemCapacity = 300;
+            requirements(Category.defense, with(CaeItems.lonsdaleite, 20, Items.copper, 30, Items.titanium, 40));
         }
         @Override
             public boolean canPlaceOn(Tile tile, Team team, int rotation) {

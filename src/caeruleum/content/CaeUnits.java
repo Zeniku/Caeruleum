@@ -190,7 +190,7 @@ public class CaeUnits{
 					shootSound = Sounds.shotgun;
 				}},
 
-				new Weapon("caeruleum-interitusArtillery"){{
+				new Weapon(){{
 					reload = 60 * 4;
 					recoil = 4;
 					bullet = new ArtilleryBulletType(){{

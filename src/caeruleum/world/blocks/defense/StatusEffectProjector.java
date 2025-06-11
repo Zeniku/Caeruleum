@@ -65,6 +65,7 @@ public class StatusEffectProjector extends Block{
     @Override
     public void updateTile(){
       if(!consumeTriggerValid()) return;
+			
 			aTime = Math.min(aTime + edelta(), reloadTime);
 
 			  if(aTime < reloadTime) return;
@@ -98,6 +99,7 @@ public class StatusEffectProjector extends Block{
 			      appliedEnemies = true;
 			    });
 
+					consume();
 					aTime = 0f;
 
     };

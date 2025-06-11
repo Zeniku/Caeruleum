@@ -87,7 +87,7 @@ public class CaeBullets {
 			trailColor = Pal.lancerLaser;
 		}};
 		
-		standardSword = new RandSpriteBulletType(3f, 18, "heavymachineryjava-swordBullet"){{
+		standardSword = new RandSpriteBulletType(3f, 18, "caeruleum-swordBullet"){{
 			lifetime = 60f;
 			pierceCap = 10;
 			trailWidth = 4.5f;
@@ -96,7 +96,7 @@ public class CaeBullets {
 			trailColor = Pal.heal;
 		}};
 
-		mediumSword = new RandSpriteBulletType(3f, 29, "heavymachineryjava-swordBullet"){{
+		mediumSword = new RandSpriteBulletType(3f, 29, "caeruleum-swordBullet"){{
 			lifetime = 60f * 1.5f;
 			pierceCap = 10;
 			trailWidth = 4.5f;
@@ -105,7 +105,7 @@ public class CaeBullets {
 			trailColor = Pal.heal;
 		}};
 
-		highSword = new RandSpriteBulletType(3f, 40, "heavymachineryjava-swordBullet"){{
+		highSword = new RandSpriteBulletType(3f, 40, "caeruleum-swordBullet"){{
 			lifetime = 60f * 2.5f;
 			pierceCap = 10;
 			trailWidth = 4.5f;
