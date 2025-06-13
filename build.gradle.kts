@@ -23,6 +23,7 @@ plugins{
     id("com.github.GglLfr.EntityAnno") apply false
 }
 
+
 val arcVersion: String by project
 val mindustryVersion: String by project
 val mindustryBEVersion: String by project
