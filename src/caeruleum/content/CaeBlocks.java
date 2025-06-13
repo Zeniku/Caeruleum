@@ -198,9 +198,10 @@ public class CaeBlocks {
         }};
 
         miniCore = new PowerCore("miniCore"){{
+
             size = 2;
             itemCapacity = 300;
-            requirements(Category.defense, with(CaeItems.lonsdaleite, 20, Items.copper, 30, Items.titanium, 40));
+            requirements(Category.effect, with(CaeItems.lonsdaleite, 20, Items.copper, 30, Items.titanium, 40));
         }
         @Override
             public boolean canPlaceOn(Tile tile, Team team, int rotation) {

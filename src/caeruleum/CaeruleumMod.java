@@ -6,6 +6,7 @@ import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.ui.dialogs.*;
 import caeruleum.content.*;
+import caeruleum.gen.*;
 
 public class CaeruleumMod extends Mod{
 
@@ -28,6 +29,8 @@ public class CaeruleumMod extends Mod{
 
     @Override
     public void loadContent(){
+        EntityRegistry.register();
+
         CaeItems.load();
         CaeBullets.load();
         CaeUnits.load();

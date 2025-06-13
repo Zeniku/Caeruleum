@@ -1,42 +1,36 @@
-# Caeruleum 
-A Java Mindustry mod
-adds whatever i add
+# `Caeruleum`
 
-I forgot what I need to add
-# How To Build
-## Building for Desktop Testing
+A [Mindustry](https://github.com/Anuken/Mindustry) Java mod ![icon](https://github.com/Zeniku/Caeruleum/blob/master/assets/icon.png)
 
-1. Install JDK **17**.
-2. Run `gradlew jar` [1].
-3. Your mod jar will be in the `build/libs` directory. **Only use this version for testing on desktop. It will not work with Android.**
-To build an Android-compatible version, you need the Android SDK. You can either let Github Actions handle this, or set it up yourself. See steps below.
+Adds a few things
 
-## Building through Github Actions
+## Building 
 
-This repository is set up with Github Actions CI to automatically build the mod for you every commit. This requires a Github repository, for obvious reasons.
-To get a jar file that works for every platform, do the following:
-1. Make a Github repository with your mod name, and upload the contents of this repo to it. Perform any modifications necessary, then commit and push. 
-2. Check the "Actions" tab on your repository page. Select the most recent commit in the list. If it completed successfully, there should be a download link under the "Artifacts" section. 
-3. Click the download link (should be the name of your repo). This will download a **zipped jar** - **not** the jar file itself [2]! Unzip this file and import the jar contained within in Mindustry. This version should work both on Android and Desktop.
+Install JDK 17 or higher.
 
-## Building Locally
+Mindustry Java mods are cross-platform, supporting PC (Windows, Mac, Linux) and Android. This section describes how to build the JARs for both PC and Android. Building these JARs are done through the usage of terminals: `cmd.exe` in Windows, Terminal in Mac, and if you're either on Linux or using a terminal emulator on Android such as Termux, you should already know what you're doing anyway. Following these steps should require basic terminal functionality such as `cd`.
 
-Building locally takes more time to set up, but shouldn't be a problem if you've done Android development before.
-1. Download the Android SDK, unzip it and set the `ANDROID_HOME` environment variable to its location.
-2. Make sure you have API level 30 installed, as well as any recent version of build tools (e.g. 30.0.1)
-3. Add a build-tools folder to your PATH. For example, if you have `30.0.1` installed, that would be `$ANDROID_HOME/build-tools/30.0.1`.
-4. Run `gradlew deploy`. If you did everything correctlly, this will create a jar file in the `build/libs` directory that can be run on both Android and desktop. 
+### Desktop Build
 
-## Adding Dependencies
+Desktop builds are convenient for testing, but will obviously **not** work on Android, so never include this in your releases. Desktop JARs have `Desktop` suffixed to their name, e.g. `ModTemplateDesktop.jar`. Here's how you can build the mod:
+1. Open your terminal, and `cd` to your local copy of the mod.
+2. Ensure your internet connection on first or clean builds, as the project will try to fetch prerequisites from the internet.
+3. Run `gradlew jar` *(replace `gradlew` with `./gradlew` on Mac/Linux)*. This should create a JAR inside `build/libs/` that you can copy over to the Mindustry mods folder to install it.
+4. You can also then run `gradlew install` to automatically install the mod JAR, or even `gradlew jar install` to do both compiling and installing at once.
 
-Please note that all dependencies on Mindustry, Arc or its submodules **must be declared as compileOnly in Gradle**. Never use `implementation` for core Mindustry or Arc dependencies. 
+### Android Build
 
-- `implementation` **places the entire dependency in the jar**, which is, in most mod dependencies, very undesirable. You do not want the entirety of the Mindustry API included with your mod.
-- `compileOnly` means that the dependency is only around at compile time, and not included in the jar.
+Android builds are automated on the CI hosted by GitHub Actions, so you should be able to just push a commit and wait for the CI to provide your build. If you still want to build locally, though, follow these steps.
 
-Only use `implementation` if you want to package another Java library *with your mod*, and that library is not present in Mindustry already.
+#### Installing Android SDK
+1. Install [Android SDK](https://developer.android.com/studio#command-line-tools-only), specifically the "**Command line tools only**" section. Download the tools that match your platform.
+2. Unzip the Android SDK command line tools inside a folder; let's call it `AndroidSDK/` for now.
+3. Inside this folder is a folder named `cmdline-tools/`. Put everything inside `cmdline-tools/` to a new folder named `latest/`, so that the folder structure looks like `AndroidSDK/cmdline-tools/latest/`.
+4. Open your terminal, `cd` to the `latest/` folder.
+5. Run `sdkmanager --install "platforms;android-35" "build-tools;35.0.0"`. These versions correspond to the `androidSdkVersion` and `androidBuildVersion` properties inside `gradle.properties`, which default to `35` and `35.0.0`, respectively.
+6. Set environment variable `ANDROID_SDK_ROOT` as the full path to the `AndroidSDK/` folder you created, and restart your terminal to update the environments.
 
---- 
-
-*[1]* *On Linux/Mac it's `./gradlew`, but if you're using Linux I assume you know how to run executables properly anyway.*  
-*[2]: Yes, I know this is stupid. It's a Github UI limitation - while the jar itself is uploaded unzipped, there is currently no way to download it as a single file.*
+#### Building
+1. Open your terminal, and `cd` to your local copy of the mod.
+2. Run `gradlew dex`. This should create a cross-platform JAR inside `build/libs/` that isn't suffixed with `Desktop` that you can copy over to the Mindustry mods folder to install it.
+3. You can then copy the resulting artifact to your phone's Mindustry mods folder in its data 
