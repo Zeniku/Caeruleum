@@ -1,3 +1,4 @@
 <factorypath>
-    <factorypathentry kind="EXTJAR" id="/data/data/com.termux/files/home/.gradle/caches/modules-2/files-2.1/com.github.Anuken/jabel/93fde537c7/f04617218b023d54c8361bcf52098ea494c63d3a/jabel-93fde537c7.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="/data/data/com.termux/files/home/.gradle/caches/modules-2/files-2.1/com.github.GglLfr.EntityAnno/downgrader/v146.0.11/a582262eb64b60d72bdd37f7395016028b1e489c/downgrader-v146.0.11.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="/data/data/com.termux/files/home/.gradle/caches/modules-2/files-2.1/com.github.Anuken.Arc/arc-core/v146/fb0b74a8b47056de0840db6892a6e19e9a60155a/arc-core-v146.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>

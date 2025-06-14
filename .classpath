@@ -6,6 +6,12 @@
 			<attribute name="gradle_used_by_scope" value="main,test"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" output="bin/main" path="build/generated/source/kapt/main">
+		<attributes>
+			<attribute name="gradle_scope" value="main"/>
+			<attribute name="gradle_used_by_scope" value="main,test"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" output="bin/main" path="build/fetched">
 		<attributes>
 			<attribute name="gradle_scope" value="main"/>
@@ -20,11 +26,4 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin/default"/>
-
-<classpathentry kind="src" output="bin/main" path="build/generated/source/kapt/main">
-	<attributes>
-	<attribute name="gradle_scope" value="main"/>
-	<attribute name="gradle_used_by_scope" value="main,test"/>
-	</attributes>
-</classpathentry>
 </classpath>

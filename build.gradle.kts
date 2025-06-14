@@ -55,8 +55,12 @@ fun entity(module: String): String{
 
 allprojects{
     apply(plugin = "java")
-    sourceSets["main"].java.setSrcDirs(listOf(layout.projectDirectory.dir("src")))
-
+    sourceSets["main"].java.setSrcDirs(
+        listOf(
+            layout.projectDirectory.dir("src"),
+            file("build/generated/source/kapt/main") // So jdtls can see and not scream at me
+        )
+    )
     configurations.configureEach{
         // Resolve the correct Mindustry dependency, and force Arc version.
         resolutionStrategy.eachDependency{
