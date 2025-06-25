@@ -1,23 +1,28 @@
 package caeruleum.content;
 
 import arc.graphics.Color;
+import caeruleum.entities.bullet.PortalBulletType;
 import caeruleum.world.blocks.defense.*;
 import caeruleum.world.blocks.storage.*;
 import caeruleum.world.blocks.defense.turrets.*;
 import mindustry.content.*;
+import mindustry.entities.bullet.ContinuousLaserBulletType;
 import mindustry.entities.pattern.ShootAlternate;
 import mindustry.entities.pattern.ShootPattern;
 import mindustry.entities.pattern.ShootSummon;
 import mindustry.game.Team;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.defense.turrets.PowerTurret;
+import mindustry.world.blocks.distribution.*;
+import mindustry.world.blocks.production.*;
 import mindustry.world.blocks.environment.*;
 import mindustry.world.blocks.production.GenericCrafter;
 import mindustry.world.draw.DrawFrames;
 import mindustry.graphics.CacheLayer;
+import mindustry.graphics.Pal;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
-
 import static mindustry.type.ItemStack.*;
 
 public class CaeBlocks { 
@@ -27,14 +32,19 @@ public class CaeBlocks {
     aquafluent, deepAquafluent,
     bush, blueFlower, blueTendrils, 
     caeruleumOre, rubrariumOre, virideaurumOre,
+    //distribution
+    lonsdaleiteDuct,
+    //drils
+    drill1, drill2, drill3, drill4,
     //walls
     lonsdaleiteWall, lonsdaleiteWallLarge,
     //turrets
-    heavenlyStrike,	praefector,
+    t1frac, t2frac, t3frac, t4frac, heavenlyStrike,	
+    t1ov, t2ov, t3ov, praefector,
     //defense
     statusEffectProjector, tesla,
     //Production
-    lonsdaleiteCompressor,
+    lonsdaleiteCompressor, lonsdaleitePress,
 
     miniCore;
 
@@ -105,6 +115,7 @@ public class CaeBlocks {
         caeruleumOre = new OreBlock("ore-caeruleum", CaeItems.caeruleum){{
             oreThreshold = 0.864f;
             oreScale = 24.904762f;
+
         }};
         rubrariumOre = new OreBlock("ore-rubrarium", CaeItems.rubrarium){{
             oreThreshold = 0.864f;
@@ -114,7 +125,66 @@ public class CaeBlocks {
             oreThreshold = 0.853f;
             oreScale = 24.004762f;
         }};
+
+        lonsdaleiteDuct = new Duct("lonsdaleiteDuct"){{
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            speed = 4f;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        drill1 = new BurstDrill("miniDrill"){{
+            size = 1;
+            drillTime = 400f;
+            tier = 2;
+            hasPower = true;
+            outputsPower = false;
+
+            requirements(Category.production, with(Items.copper, 10f, CaeItems.lonsdaleite, 5f));
+            consumePower(0.5f);
+        }};
+
+        drill2 = new BurstDrill("pressure-drill"){{
+            size = 2;
+            drillTime = 340f;
+            tier = 2;
+            hasPower = true;
+            outputsPower = false;
+
+            requirements(Category.production, with(Items.copper, 30f, CaeItems.lonsdaleite, 50f));
+            consumePower(0.7f);
+        }};
+
+        drill3 = new BurstDrill("pressure-bore"){{
+            size = 3;
+            drillTime = 210f;
+            tier = 3;
+            hasPower = true;
+            outputsPower = false;
+
+            requirements(Category.production, with(CaeItems.caeruleum, 70f, CaeItems.lonsdaleite, 50f, Items.titanium, 30f));
+            consumePower(1f);
+            consumeLiquid(Liquids.water, 0.1f).boost();
+
+
+        }};
+        drill4 = new BurstDrill("boom-drill"){{
+            size = 4;
+            drillTime = 210f;
+            tier = 4;
+            hasPower = true;
+            outputsPower = false;
+
+            liquidBoostIntensity = 1.2f;
+
+            requirements(Category.production, with(CaeItems.caeruleum, 100f, CaeItems.lonsdaleite, 70f, Items.titanium, 40f));
+            consumePower(1.1f);
+            consumeLiquid(Liquids.water, 0.1f).boost();
+        }};
         
+
         statusEffectProjector = new StatusEffectProjector("statusEffectProjector"){{
             statusFxEnemies = CaeFx.flameBurst;
             healEffect = CaeFx.healWave;
@@ -134,7 +204,28 @@ public class CaeBlocks {
             consumeItems(with(CaeItems.caeruleum, 5f));
         }};
 
+
         lonsdaleiteCompressor = new GenericCrafter("lonsdaleite-compressor"){{
+            size = 2;
+            hasPower = true;
+            hasItems = true;
+            hasLiquids = false;
+            craftTime = 60;
+            craftEffect = Fx.producesmoke;
+            update = true;
+            itemCapacity = 25;
+            consumePower(0.4f);
+            consumeItem(Items.graphite, 10);
+
+            drawer = new DrawFrames(){{
+            frames = 4;
+        }};
+
+            outputItem = new ItemStack(CaeItems.lonsdaleite, 1);
+            requirements(Category.crafting, with(Items.copper, 10, Items.lead, 25, Items.graphite, 80));
+        }};
+
+        lonsdaleitePress = new GenericCrafter("lonsdaleite-press"){{
             size = 3;
             hasPower = true;
             hasItems = true;
@@ -150,23 +241,85 @@ public class CaeBlocks {
             frames = 4;
         }};
 
-            outputItem = new ItemStack(CaeItems.lonsdaleite, 1);
+            outputItem = new ItemStack(CaeItems.lonsdaleite, 2);
             requirements(Category.crafting, with(Items.copper, 100, Items.lead, 150, Items.silicon, 250, Items.titanium, 120, Items.graphite, 80));
         }};
+        t1frac = new PowerTurret("t1frac"){{
+            size = 1;
+            shootType = CaeBullets.standardSword;
+            range = (shootType.lifetime * shootType.speed) / 1.5f;
+            reload = 45f;
+            consumePower(0.2f);
+            requirements(Category.turret, with(CaeItems.lonsdaleite, 5, CaeItems.virideaurum, 5));
+        }};
+        t2frac = new PowerTurret("t2frac"){{
+            size = 2;
+            shootType = CaeBullets.mediumSword;
+            range = (shootType.lifetime * shootType.speed) / 1.5f;
+            reload = 65f;
+            consumePower(0.2f);
+            requirements(Category.turret, with(CaeItems.lonsdaleite, 5, CaeItems.virideaurum, 5));
+        }};
+        t3frac = new PowerTurret("t3frac"){{
+            size = 3;
+            shootType = new PortalBulletType(){{
+                lifetime = 120f;
+                bulletT = CaeBullets.mediumSword;
+                followParentAim = true;
+            }};
+            range = 8f * 30f;
+            shoot = new ShootSummon(0, 0, range * 0.5f, 10f){{
+                shots = 2;
+            }};
+            reload = 65f;
+            consumePower(0.2f);
+            coolant = consumeCoolant(0.15f);
+            requirements(Category.turret, with(CaeItems.lonsdaleite, 5, CaeItems.virideaurum, 5));
+        }};
 
+        t4frac = new FractalTurret("t4frac"){{
+            size = 4;
+            shootType = new PortalBulletType(){{
+                lifetime = 600f;
+                bulletT = new ContinuousLaserBulletType(){{
+                  length = 8f * 20f;
+                  damage = 20f;
+                  width = 3f;
+                  colors = new Color[]{Pal.heal, Pal.heal, Color.white};
+                }};
+                followParentAim = true;
+                continuous = true;
+                warmupTime = 50f;
+            }};
+            shoot = new ShootPattern(){{
+                shots = 3;
+            }};
+            range = 8f * 45f;
+            reload = 450f;
+            consumePower(0.2f);
+            coolant = consumeCoolant(0.15f);
+            requirements(Category.turret, with(CaeItems.lonsdaleite, 5, CaeItems.virideaurum, 5));
+        }};
         heavenlyStrike = new FractalTurret("heavenlyStrike"){{
             health = 1540;
             recoil = 0;
-            shootType = CaeBullets.mediumSword;
+            shootType = CaeBullets.highSword;
             range = (shootType.lifetime * shootType.speed) / 1.5f;
-            shoot = new ShootSummon(0f, 0f, range, 10f){{
-                shots = 3;
-            }};
-            size = 4;
+            size = 5;
             reload = 20f;
+            consumePower(1f);
             requirements(Category.turret, with(CaeItems.lonsdaleite, 150, Items.titanium, 200, Items.lead, 280));
         }};
+        t1ov = new PowerTurret("t1ov"){{
+            health = 200;
 
+        }}; 
+        t2ov = new PowerTurret("t2ov"){{
+
+        }}; 
+        t3ov = new PowerTurret("t3ov"){{
+
+        }};
         praefector = new DisabledPredictTurret("praefector"){{
             health = 1280;
             recoil = 2;
@@ -177,6 +330,7 @@ public class CaeBlocks {
             reload = 15f;
             shootType = CaeBullets.mediumOverseer;
             range = (shootType.lifetime * shootType.speed) / 1.5f;
+            consumePower(1f);
             requirements(Category.turret, with(CaeItems.lonsdaleite, 100, Items.titanium, 150, Items.lead, 180));
         }};
 
@@ -198,9 +352,13 @@ public class CaeBlocks {
         }};
 
         miniCore = new PowerCore("miniCore"){{
-
             size = 2;
             itemCapacity = 300;
+            alwaysUnlocked = false;
+            unitType = UnitTypes.alpha;
+            health = 1200;
+            itemCapacity = 1500;
+            unitCapModifier = 0;
             requirements(Category.effect, with(CaeItems.lonsdaleite, 20, Items.copper, 30, Items.titanium, 40));
         }
         @Override

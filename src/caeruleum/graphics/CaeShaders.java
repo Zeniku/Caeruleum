@@ -1,11 +1,8 @@
 package caeruleum.graphics;
 
-import arc.Core;
-import arc.files.Fi;
 import arc.graphics.Color;
 import arc.graphics.gl.Shader;
 import arc.math.geom.Vec3;
-import arc.util.Log;
 import mindustry.Vars;
 import mindustry.type.Planet;
 

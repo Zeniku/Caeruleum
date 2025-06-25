@@ -566,7 +566,7 @@ public class CaeUnits{
 					soundPitchMax = 1;
 					rotate = true;
 					rotateSpeed = 60;
-					bullet = new GroundSpikeBulletType(){{
+					bullet = new GroundSummonBulletType(){{
 					  shootEffect = Fx.none;
 						speed = 2.5f;
 						lifetime = 60;
@@ -633,7 +633,7 @@ public class CaeUnits{
 					soundPitchMax = 1;
 					rotate = true;
 					rotateSpeed = 60;
-					bullet = new GroundSpikeBulletType(){{
+					bullet = new GroundSummonBulletType(){{
 						shootEffect = Fx.none;
 						speed = 2.5f;
 						lifetime = 60;

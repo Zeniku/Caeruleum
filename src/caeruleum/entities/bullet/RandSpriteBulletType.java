@@ -60,12 +60,10 @@ public class RandSpriteBulletType extends BasicBulletType{
 	public void init(Bullet b){
 		if(b.data == null){
 			int ind = frontRegions.indexOf(frontRegions.random());
-			if(Mathf.chance(critChance)){
-				b.data = new RandSpriteBulletData(frontRegions.get(ind), backRegions.get(ind), true);
-			}else{
-				b.data = new RandSpriteBulletData(frontRegions.get(ind), backRegions.get(ind), false);
-			}
+			b.data = new RandSpriteBulletData(frontRegions.get(ind), backRegions.get(ind));
+			if(Mathf.random() < critChance) ((RandSpriteBulletData)b.data).crit = true;
 			if(((RandSpriteBulletData)b.data).crit) b.damage *= critMultiplier;
+
 		}
 		
 		if(spawnFx != null || spawnFx != Fx.none){
@@ -78,7 +76,7 @@ public class RandSpriteBulletType extends BasicBulletType{
 	public void update(Bullet b){
 		if(!(b.data instanceof RandSpriteBulletData dat)) return;
 		super.update(b);
-		if(dat.crit && Mathf.chanceDelta(1)){
+		if(dat.crit && Mathf.random() < 0.5){
 			if(critTrail != null || critTrail != Fx.none){
 				critTrail.at(b);
 			}
@@ -132,6 +130,10 @@ public class RandSpriteBulletType extends BasicBulletType{
 			this.sprite = sprite;
 			this.spriteBack = spriteBack;
 			this.crit = crit;
+		}
+
+		public RandSpriteBulletData(TextureRegion sprite, TextureRegion spriteBack){
+			this(sprite, spriteBack, true);
 		}
 	}
 }

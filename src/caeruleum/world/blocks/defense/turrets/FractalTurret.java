@@ -1,16 +1,20 @@
 package caeruleum.world.blocks.defense.turrets;
 
-import arc.util.*;
 import arc.math.*;
-import arc.math.geom.*;
+import arc.math.geom.Vec2;
+import arc.util.Tmp;
+import mindustry.content.Fx;
 import mindustry.entities.Effect;
 import mindustry.entities.Mover;
 import mindustry.entities.bullet.*;
+import mindustry.gen.Bullet;
 
 public class FractalTurret extends DisabledPredictTurret{
   
   public FractalTurret(String name){
     super(name);
+    shootEffect = Fx.none;
+    smokeEffect = Fx.none;
   }
   
   public class FractalTurretBuild extends DisabledPredictTurretBuild{
@@ -20,21 +24,23 @@ public class FractalTurret extends DisabledPredictTurret{
 
       if(dead || (!consumeAmmoOnce && !hasAmmo())) return;
 
-      float
-      xSpread = Mathf.range(xRand),
-      bulletX = x + Angles.trnsx(rotation - 90, shootX + xOffset + xSpread, shootY + yOffset),
-      bulletY = y + Angles.trnsy(rotation - 90, shootX + xOffset + xSpread, shootY + yOffset),
-      shootAngle = rotation + angleOffset + Mathf.range(inaccuracy + type.inaccuracy);
+      Vec2 tp = targetPos;
 
-      float lifeScl = type.scaleLife ? Mathf.clamp(Mathf.dst(bulletX, bulletY, targetPos.x, targetPos.y) / type.range, minRange / type.range, range() / type.range) : 1f;
+      Tmp.v1.set(tp);
+      if(Mathf.dst(x, y, tp.x, tp.y) > range) Tmp.v1.set(tp).sub(x, y).clamp(-range, range).add(x, y);
+      
+      float hx = Tmp.v1.x + Angles.trnsx(Mathf.random(360), Mathf.random(range * 0.5f));
+      float hy = Tmp.v1.y + Angles.trnsy(Mathf.random(360), Mathf.random(range * 0.5f));
+      
+      float ang = Angles.angle(hx, hy, tp.x, tp.y);
+      float lifeScl = type.scaleLife ? Mathf.clamp(Mathf.dst(hx, hy, tp.x, tp.y) / type.range, minRange / type.range, range / type.range) : 1f;
+      
+      Bullet h = type.create(this, team, hx, hy, ang, lifeScl);
+      handleBullet(h, xOffset, yOffset, rotation);
 
-      //TODO aimX / aimY for multi shot turrets?
-
-      handleBullet(type.create(this, team, bulletX, bulletY, shootAngle, -1f, (1f - velocityRnd) + Mathf.random(velocityRnd), lifeScl, null, mover, targetPos.x, targetPos.y), xOffset, yOffset, shootAngle - rotation);
-
-      (shootEffect == null ? type.shootEffect : shootEffect).at(bulletX, bulletY, rotation + angleOffset, type.hitColor);
-      (smokeEffect == null ? type.smokeEffect : smokeEffect).at(bulletX, bulletY, rotation + angleOffset, type.hitColor);
-      shootSound.at(bulletX, bulletY, Mathf.random(soundPitchMin, soundPitchMax));
+      (shootEffect == null ? type.shootEffect : shootEffect).at(hx, hy, rotation + angleOffset, type.hitColor);
+      (smokeEffect == null ? type.smokeEffect : smokeEffect).at(hx, hy, rotation + angleOffset, type.hitColor);
+      shootSound.at(hy, hx, Mathf.random(soundPitchMin, soundPitchMax));
 
       ammoUseEffect.at(
           x - Angles.trnsx(rotation, ammoEjectBack),

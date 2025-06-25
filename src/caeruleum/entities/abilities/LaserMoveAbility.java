@@ -25,9 +25,8 @@ public class LaserMoveAbility extends Ability {
   public void update(Unit unit){
     float scl = Mathf.clamp((unit.vel.len() - min) / (max - min));
     float bx = unit.x + Angles.trnsx(unit.rotation, offsetX);
-    float by = unit.y + Angles.trnsy(unit.rotation, offsetX);
+    float by = unit.y + Angles.trnsy(unit.rotation, offsetY);
     if(bullet != null){
-
       bullet.set(bx, by);
       bullet.rotation(unit.rotation);
       bullet.time = 0f;

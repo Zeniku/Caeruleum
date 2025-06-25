@@ -6,7 +6,7 @@ import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.entities.bullet.*;
 
-public class GroundSpikeBulletType extends BasicBulletType{
+public class GroundSummonBulletType extends BasicBulletType{
 	public float groundEffectST = 0f;
 	public float groundBulletSpacing = 0f;
 	public float groundBulletST = 0f;
@@ -14,7 +14,7 @@ public class GroundSpikeBulletType extends BasicBulletType{
 	public BulletType groundBullet = Bullets.placeholder;
 	public int groundBullets = 2;
 
-	public GroundSpikeBulletType(float speed, float damage, String sprite){
+	public GroundSummonBulletType(float speed, float damage, String sprite){
 		super(speed, damage, sprite);
 		absorbable = false;
 		reflectable = false;
@@ -29,11 +29,11 @@ public class GroundSpikeBulletType extends BasicBulletType{
 		smokeEffect = Fx.none;
 	}
 
-	public GroundSpikeBulletType(float speed, float damage){
+	public GroundSummonBulletType(float speed, float damage){
 		this(speed, damage, "bullet");
 	}
 	
-	public GroundSpikeBulletType(){
+	public GroundSummonBulletType(){
 		this(1, 1);
 	}
   @Override

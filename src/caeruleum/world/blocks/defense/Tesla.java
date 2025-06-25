@@ -59,24 +59,24 @@ public class Tesla extends Block{
 		
 		@Override
 		public void updateTile(){
-      if(!consumeTriggerValid()) return;
 
       rTime = Math.min(rTime + edelta(), reloadTime);
 
       if(rTime < reloadTime) return;
+      if(efficiency > 0) consume();
 
       CaeFunc.radiusEnemies(team, x, y, range(), unit -> {
         unit.damage(damage);
         float ang = Angles.angle(x, y, unit.x, unit.y);
         if(hitEffect != Fx.none) hitEffect.at(unit, ang);
         CaeFx.fakeLightning.at(x, y, ang, lightningColor, new LightningData(unit, 4f)); 
-        
+      });
+
         if(Mathf.chance(25f)){
           for(int i = 0; i < lightningCount; i++){
             Lightning.create(team, lightningColor, damage * 0.5f, x, y, Mathf.random(0f, 359f), Mathf.random(lightningLength, lightningLengthRand));
           }
         }
-      });
 
       rTime = 0f;
 		}
@@ -84,11 +84,9 @@ public class Tesla extends Block{
 		@Override
 		public void draw(){
 			super.draw();
-      if(consumeTriggerValid()){
         Draw.z(Layer.bullet + 0.01f);
         Draw.color(lightningColor);
         Fill.circle(x, y, 2f * 1.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f));
-      }
     }
 		
 		@Override

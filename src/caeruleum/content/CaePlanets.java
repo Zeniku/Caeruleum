@@ -1,26 +1,22 @@
 package caeruleum.content;
 
 import arc.graphics.Color;
-import caeruleum.graphics.CaeShaders;
-import caeruleum.graphics.g3d.CaeHexMesh;
-import caeruleum.graphics.g3d.HexData;
 import caeruleum.maps.planet.CaeruleumPlanetGenerator;
+import caeruleum.maps.planet.TestGeneration;
 import mindustry.content.Items;
 import mindustry.content.Planets;
 import mindustry.game.Team;
-import mindustry.graphics.Shaders;
 import mindustry.graphics.g3d.HexMesh;
 import mindustry.graphics.g3d.HexSkyMesh;
 import mindustry.graphics.g3d.MultiMesh;
-import mindustry.graphics.g3d.NoiseMesh;
 import mindustry.type.Planet;
 
 
 public class CaePlanets {
-    public static Planet caeruleumPlanet;
+    public static Planet caeruleumPlanet, die;
     
     public static void load(){
-        caeruleumPlanet = new Planet("caeruleum", Planets.sun, 1f, 3){{
+        caeruleumPlanet = new Planet("caeruleum", Planets.sun, 1f, 2){{
             generator = new CaeruleumPlanetGenerator();
             meshLoader = () -> new HexMesh(this, 6);
             cloudMeshLoader = () -> new MultiMesh(
@@ -52,5 +48,31 @@ public class CaePlanets {
             landCloudColor = Color.valueOf("363f9a").cpy().a(0.5f);
             hiddenItems.addAll(Items.erekirItems).removeAll(Items.serpuloItems);
         }};
+    die = new Planet("die", caeruleumPlanet, 0.5f, 2){{
+        generator = new TestGeneration();
+        meshLoader = () -> new HexMesh(this, 6);
+            launchCapacityMultiplier = 0.5f;
+            sectorSeed = 2;
+            allowWaves = true;
+            allowWaveSimulation = true;
+            allowSectorInvasion = true;
+            allowLaunchSchematics = true;
+            enemyCoreSpawnReplace = true;
+            allowLaunchLoadout = true;
+            //doesn't play well with configs
+            prebuildBase = false;
+            ruleSetter = r -> {
+                r.waveTeam = Team.blue;
+                r.placeRangeCheck = false;
+                r.showSpawns = false;
+            };
+            iconColor = Color.valueOf("7d4dff");
+            atmosphereColor = CaeBlocks.deepAquafluent.mapColor;
+            atmosphereRadIn = 0.07f;
+            atmosphereRadOut = 0.25f;
+            startSector = 15;
+            alwaysUnlocked = true;
+            landCloudColor = Color.valueOf("363f9a").cpy().a(0.5f);
+    }};
     }
 }

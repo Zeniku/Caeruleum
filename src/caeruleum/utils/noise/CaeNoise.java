@@ -1,12 +1,7 @@
 package caeruleum.utils.noise;
 
 import arc.math.geom.Vec3;
-import arc.util.Log;
-import arc.util.noise.Ridged;
 import arc.util.noise.Simplex;
-import caeruleum.utils.math.CaeMath;
-import arc.math.Interp;
-import arc.math.Mathf;
 
 public class CaeNoise {
 

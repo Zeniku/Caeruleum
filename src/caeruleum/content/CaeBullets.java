@@ -90,7 +90,9 @@ public class CaeBullets {
 		standardSword = new RandSpriteBulletType(3f, 18, "caeruleum-swordBullet"){{
 			lifetime = 60f;
 			pierceCap = 10;
-			trailWidth = 4.5f;
+			trailWidth = 2.5f;
+			height = 8f * 1.2f;
+			width = 8f * 1.2f;
 			critTrail = CaeFx.critTrail;
 			spawnFx = CaeFx.swordSpawnFx;
 			trailColor = Pal.heal;
@@ -114,7 +116,7 @@ public class CaeBullets {
 			trailColor = Pal.heal;
 		}};
 
-		standardSpike = new ShrapnelBulletType(){{
+		standardSpike = new SpikeBulletType(){{
 			fromColor = Color.valueOf("404040FF");
 			toColor = Color.valueOf("2a2a2aFF");
 			hitColor = Color.valueOf("2a2a2aFF");
@@ -137,7 +139,7 @@ public class CaeBullets {
 			recoil = -3; //dash
 		}};
 
-		mediumSpike = new ShrapnelBulletType(){{
+		mediumSpike = new SpikeBulletType(){{
 			fromColor = Color.valueOf("404040FF");
 			toColor = Color.valueOf("2a2a2aFF");
 			hitColor = Color.valueOf("2a2a2aFF");
@@ -160,7 +162,7 @@ public class CaeBullets {
 			recoil = -2; //dass
 		}};
 
-		highSpike = new ShrapnelBulletType(){{
+		highSpike = new SpikeBulletType(){{
 			fromColor = Color.valueOf("404040FF");
 			toColor = Color.valueOf("2a2a2aFF");
 			hitColor = Color.valueOf("2a2a2aFF");
@@ -185,7 +187,7 @@ public class CaeBullets {
 		standardPortal = new PortalBulletType(){{}};
 
 		//UnitSpecific
-		luciusBullet = new ShrapnelBulletType(){{
+		luciusBullet = new SpikeBulletType(){{
 			fromColor = Color.valueOf("404040");
 			toColor = Color.valueOf("2a2a2a");
 			hitColor = Color.valueOf("2a2a2a");
@@ -206,7 +208,7 @@ public class CaeBullets {
 			fragBullets = 4;
 		}};
 
-		machaeraBullet = new ShrapnelBulletType(){{
+		machaeraBullet = new SpikeBulletType(){{
 			fromColor = Color.valueOf("404040FF");
 			toColor = Color.valueOf("2a2a2aFF");
 			hitColor = Color.valueOf("2a2a2aFF");

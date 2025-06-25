@@ -19,7 +19,6 @@ import arc.util.noise.Noise;
 import arc.util.noise.Ridged;
 import arc.util.noise.Simplex;
 import caeruleum.content.CaeBlocks;
-import caeruleum.utils.math.CaeMath;
 import caeruleum.utils.noise.CaeNoise;
 import mindustry.ai.Astar;
 import mindustry.ai.BaseRegistry;
@@ -138,8 +137,8 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                 //no sectors near start sector!
                 if (
                         osec.id == sector.planet.startSector || //near starting sector
-                                osec.generateEnemyBase && poles < 0.85 || //near other base
-                                (sector.preset != null && noise < 0.11) //near preset
+                        osec.generateEnemyBase && poles < 0.85 || //near other base
+                        (sector.preset != null && noise < 0.11) //near preset
                 ) {
                     return;
                 }
@@ -294,10 +293,11 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
             distort(10f, 12f);
 
             float constraint = 1.3f;
-            float radius = width / 2f / Mathf.sqrt3;
-            int rooms = rand.random(2, 5);
-            Seq<Room> roomseq = new Seq<>();
+            float radius = width / 2f / Mathf.sqrt3; //size of room
+            int rooms = rand.random(2, 5); // how many rooms
+            Seq<Room> roomseq = new Seq<>(); // all rooms
 
+            //generate the rooms
             for (int i = 0; i < rooms; i++) {
                 Tmp.v1.trns(rand.random(360f), rand.random(radius / constraint));
                 float rx = (width / 2f + Tmp.v1.x);
@@ -308,9 +308,10 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
             }
 
             //check positions on the map to place the player spawn. this needs to be in the corner of the map
-            Room spawn = null;
-            Seq<Room> enemies = new Seq<>();
-            int enemySpawns = rand.random(1, Math.max((int) (sector.threat * 4), 1));
+            Room spawn = null; // spawn room
+            Seq<Room> enemies = new Seq<>(); //enemies spawnrooms
+            int enemySpawns = rand.random(1, Math.max((int) (sector.threat * 4), 1)); // howmany eniemies spawn
+            
             int offset = rand.nextInt(360);
             float length = width / 2.55f - rand.random(13, 23);
             int angleStep = 5;

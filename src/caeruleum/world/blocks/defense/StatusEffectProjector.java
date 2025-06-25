@@ -3,7 +3,7 @@ package caeruleum.world.blocks.defense;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
-import arc.util.*;
+import arc.util.Time;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.entities.*;
@@ -64,8 +64,7 @@ public class StatusEffectProjector extends Block{
     
     @Override
     public void updateTile(){
-      if(!consumeTriggerValid()) return;
-			
+
 			aTime = Math.min(aTime + edelta(), reloadTime);
 
 			  if(aTime < reloadTime) return;
@@ -99,7 +98,7 @@ public class StatusEffectProjector extends Block{
 			      appliedEnemies = true;
 			    });
 
-					consume();
+					if(appliedEnemies || appliedAlly) consume();
 					aTime = 0f;
 
     };
@@ -107,11 +106,10 @@ public class StatusEffectProjector extends Block{
     @Override
 		public void draw(){
 			super.draw();
-			if(consumeTriggerValid()){
+			if(efficiency() < 0) return; 
 			  Draw.z(Layer.effect - 0.01f);
-				CaeDraw.spike(x, y, starColor, 2f * 2.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f),  2f * Time.time);
-				CaeDraw.spike(x, y, Color.white, 2f * 1.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f),  2f * Time.time);
-			};
+				CaeDraw.spike(x, y, starColor, 2f * 2.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f), Time.time *  2f);
+				CaeDraw.spike(x, y, Color.white, 2f * 1.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f),  Time.time * 2f);
 		}
 		
 		@Override

@@ -49,17 +49,19 @@ public class OrbiterBulletType extends OverseerBulletType{
   public void update(Bullet b){
     if(!(b.data instanceof OrbiterBulletData d)) return;
     float angle = (360f / orbiters);
+
     for(int i = 0; i < d.trails.size; i++){
-      d.oX.set(i, b.x + Angles.trnsx(angle * i + (orbitSpeed * Time.time), orbitRadius));
-      d.oY.set(i, b.y + Angles.trnsy(angle * i + (orbitSpeed * Time.time), orbitRadius));
+      float ang = angle * i + (orbitSpeed * Time.time);
+      d.oX.set(i, b.x + Angles.trnsx(ang, orbitRadius));
+      d.oY.set(i, b.y + Angles.trnsy(ang, orbitRadius));
+
       if(orbiterTrailEffect != Fx.none && orbiterTrailEffect != null){
-        if(Mathf.chanceDelta(1)){
-          orbiterTrailEffect.at(d.oX.get(i), d.oY.get(i), trailParam, trailColor);
-        };
+        if(Mathf.chanceDelta(1)) orbiterTrailEffect.at(d.oX.get(i), d.oY.get(i), trailParam, trailColor);
       }else{
         d.trails.get(i).update(d.oX.get(i), d.oY.get(i));
       }
     };
+
     
     if(b.timer(0, orbiterST)){
       for(int i = 0; i < d.trails.size; i++){

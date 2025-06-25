@@ -109,7 +109,7 @@ public class CaeFx {
 
   critTrail = new Effect(20, e -> {
     color(Pal.heal);
-    randLenVectors(e.id, 3, 1 + e.fin() * 3, (x, y) -> {
+    randLenVectors(e.id, 2, 1 + e.fin() * 3, (x, y) -> {
       Fill.square(e.x + x, e.y + y, e.fout() * 3.3f + 0.5f);
     });
   }),
@@ -118,8 +118,9 @@ public class CaeFx {
     color(Pal.heal);
     stroke(4 * (1 - e.finpow()));
     circle(e.x, e.y, 8 * e.finpow());
+    CaeDraw.spike(e.x, e.y, 2, 8 * e.foutpow(), 32 * e.finpow(), e.rotation);
   }),
- 
+
   orbExplode = new Effect(45, e -> {
     color(Pal.lancerLaser);
     CaeDraw.splashLine(e.x, e.y, 10f * e.fout(), 6f * e.fout(), e.id, 20, e.finpow() * (tilesize * 4f), e.rotation, 360f);
@@ -136,8 +137,8 @@ public class CaeFx {
   bigBoom = new Effect(30, e -> {
     color(Pal.sapBullet, Pal.sapBulletBack, e.fin());
     CaeDraw.splashCircle(e.x, e.y, 5 * e.fslope(), e.id, 20, e.finpow() * (8 * 10), e.rotation, 360);
-    CaeDraw.lineCircle(e.x, e.y, 4 * e.fout(), (6 * 7) * e.finpow());
-    CaeDraw.lineCircle(e.x, e.y, 6 * e.fout(), (6 * 11) * e.finpow());
+    CaeDraw.lineCircle(e.x, e.y, 4 * e.finpow(), (6 * 7) * e.finpow());
+    CaeDraw.lineCircle(e.x, e.y, 6 * e.finpow(), (6 * 11) * e.finpow());
     CaeDraw.splashLine(e.x, e.y, Pal.sapBullet, Color.valueOf("b28768ff"), e.fin(), 4 * e.fout(), 6 * e.fout(), e.id, 20, e.finpow() * (8 * 10), e.rotation, 360);
   }),
 
