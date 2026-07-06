@@ -11,7 +11,7 @@ import caeruleum.gen.*;
 public class CaeruleumMod extends Mod{
 
     public CaeruleumMod(){
-        Log.info("Loaded ExampleJavaMod constructor.");
+        Log.info("Loaded CaeruleumMod constructor.");
 
         //listen for game load event
         Events.on(ClientLoadEvent.class, e -> {
@@ -32,6 +32,7 @@ public class CaeruleumMod extends Mod{
         EntityRegistry.register();
 
         CaeItems.load();
+        CaeStatusEffects.load();
         CaeBullets.load();
         CaeUnits.load();
         CaeBlocks.load();

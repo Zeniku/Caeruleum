@@ -31,16 +31,16 @@ public SpikeBulletType(){
 	};
 	public void draw(Bullet b){
 		float realLength = b.fdata, rot = b.rotation();
-		
+		float fpow = Mathf.clamp(Mathf.pow(b.finpow() * 2, 2));
         Draw.color(fromColor, toColor, b.fin());
         for(int i = 0; i < (int)(serrations * realLength / length); i++){
             Tmp.v1.trns(rot, i * serrationSpacing);
-            float sl = Mathf.clamp(b.fout() - serrationFadeOffset) * (serrationSpaceOffset - i * serrationLenScl);
-            Drawf.tri(b.x + Tmp.v1.x, b.y + Tmp.v1.y, serrationWidth * b.finpow(), sl, b.rotation() + 45);
-            Drawf.tri(b.x + Tmp.v1.x, b.y + Tmp.v1.y, serrationWidth * b.finpow(), sl, b.rotation() - 45);
+            float sl = Mathf.clamp(fpow - serrationFadeOffset) * (serrationSpaceOffset - i * serrationLenScl);
+            Drawf.tri(b.x + Tmp.v1.x, b.y + Tmp.v1.y, serrationWidth * fpow, sl, b.rotation() + 45);
+            Drawf.tri(b.x + Tmp.v1.x, b.y + Tmp.v1.y, serrationWidth * fpow, sl, b.rotation() - 45);
         }
-        Drawf.tri(b.x, b.y, width * b.finpow(), (realLength + 50) * b.finpow(), b.rotation());
-        Drawf.tri(b.x, b.y, width * b.finpow(), 10f * b.finpow(), b.rotation() + 180f);
+        Drawf.tri(b.x, b.y, width * b.finpow(), (realLength + 50) * fpow, b.rotation());
+        Drawf.tri(b.x, b.y, width * b.finpow(), 10f * fpow , b.rotation() + 180f);
         Draw.reset();
 	};
 };

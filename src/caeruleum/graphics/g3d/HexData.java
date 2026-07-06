@@ -13,7 +13,6 @@ public class HexData{
     public Planet planet;
     public @Nullable HexMesher mesher;
     public int divisions = 5;
-    public boolean line = false;
     public float radius = 1f;
     public float intensity = 0.2f;
     public Shader shader;
@@ -24,8 +23,8 @@ public class HexData{
         this.color = color;
         this.mesher = mesher != null? mesher : new HexMesher() {
             @Override
-            public Color getColor(Vec3 position) {
-                return color;
+            public void getColor(Vec3 position , Color out) {
+                out.set(color);
             };
 
             @Override
@@ -40,6 +39,6 @@ public class HexData{
     };
 
     public Mesh buildHex(){
-        return MeshBuilder.buildHex(this.mesher, this.divisions, this.line, this.radius, this.intensity);
+        return MeshBuilder.buildHex(this.mesher, this.divisions, this.radius, this.intensity);
     };
 }

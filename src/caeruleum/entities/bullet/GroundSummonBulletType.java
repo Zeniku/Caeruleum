@@ -53,7 +53,7 @@ public class GroundSummonBulletType extends BasicBulletType{
 			if(groundEffect != null && groundEffect != Fx.none){
 		  	groundEffect.at(b.x, b.y, b.rotation(), col);
 	  	}
-			Sounds.place.at(b.x, b.y, 0.42f, 1f);
+			Sounds.blockPlace1.at(b.x, b.y, 0.42f, 1f);
 		}
 
 		if(b.timer.get(1, groundBulletST)){

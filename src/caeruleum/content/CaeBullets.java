@@ -61,7 +61,7 @@ public class CaeBullets {
 			width = 7f;
       height = 9f;
 			lifetime = 60f * 2f;
-			hitSound = Sounds.plasmaboom;
+			hitSound = Sounds.beamPlasma;
 			hitEffect = CaeFx.orbExplode;
 			orbiter = standardOverseer;
 			trailColor = Pal.lancerLaser;
@@ -71,7 +71,7 @@ public class CaeBullets {
 			width = 9f;
       height = 11f;
 			lifetime = 60f * 3f;
-			hitSound = Sounds.plasmaboom;
+			hitSound = Sounds.beamPlasma;
 			hitEffect = CaeFx.orbExplode;
 			orbiter = standardOverseer;
 			trailColor = Pal.lancerLaser;
@@ -81,7 +81,7 @@ public class CaeBullets {
 			width = 11f;
       height = 13f;
 			lifetime = 60f * 4f;
-			hitSound = Sounds.plasmaboom;
+			hitSound = Sounds.beamPlasma;
 			hitEffect = CaeFx.orbExplode;
 			orbiter = standardOverseer;
 			trailColor = Pal.lancerLaser;
@@ -188,6 +188,7 @@ public class CaeBullets {
 
 		//UnitSpecific
 		luciusBullet = new SpikeBulletType(){{
+			lifetime = 300f;
 			fromColor = Color.valueOf("404040");
 			toColor = Color.valueOf("2a2a2a");
 			hitColor = Color.valueOf("2a2a2a");
@@ -209,6 +210,7 @@ public class CaeBullets {
 		}};
 
 		machaeraBullet = new SpikeBulletType(){{
+			lifetime = 300f;
 			fromColor = Color.valueOf("404040FF");
 			toColor = Color.valueOf("2a2a2aFF");
 			hitColor = Color.valueOf("2a2a2aFF");

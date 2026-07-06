@@ -2,7 +2,7 @@
     "displayName": "Caeruleum",
     "description": "Adds a planet where you suffer",
     "version": "v1.0",
-    "minGameVersion": "146",
+    "minGameVersion": "155.4",
     "author": "Zeniku",
     "java": true,
     "main": "caeruleum.CaeruleumMod"

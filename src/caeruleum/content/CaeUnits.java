@@ -72,7 +72,7 @@ public class CaeUnits{
 					reload = 30;
 					rotate = true;
 					continuous = true;
-					shootSound = Sounds.tractorbeam;
+					shootSound = Sounds.beamParallax;
 					bullet = new RayBulletType(3f, 142f){{
 						width = 2f;
 						maxRange = 142;
@@ -169,7 +169,7 @@ public class CaeUnits{
 						statusDuration = 60 * 7;
 						serrations = 4;
 					}};
-					shootSound = Sounds.shotgun;
+					shootSound = Sounds.shootFuse;
 				}},
 
 				new Weapon("caeruleum-interitusSpikeWeapon"){{
@@ -187,7 +187,7 @@ public class CaeUnits{
 						statusDuration = 60 * 7;
 						serrations = 4;
 					}};
-					shootSound = Sounds.shotgun;
+					shootSound = Sounds.shootFuse;
 				}},
 
 				new Weapon(){{
@@ -225,7 +225,7 @@ public class CaeUnits{
 						}};
 						status = StatusEffects.sapped;
 						statusDuration = 60 * 7;
-						hitSound = Sounds.explosionbig;
+						hitSound = Sounds.explosion;
 					}};
 					y = -15 / 4;
 					x = 0;
@@ -234,7 +234,7 @@ public class CaeUnits{
 					shake = 7;
 					rotate = true;
 					rotateSpeed = 1.5f;
-					shootSound = Sounds.shootBig;
+					shootSound = Sounds.shootArtillery;
 				}}
 			);
 		}};
@@ -287,15 +287,15 @@ public class CaeUnits{
 					shootStatusDuration = 60;
 					shootStatus = StatusEffects.unmoving;
 					shake = 14;
-					shootSound = Sounds.laserblast;
-					chargeSound = Sounds.lasercharge;
+					shootSound = Sounds.beamPlasma;
+					chargeSound = Sounds.chargeVela;
 				}},
 				
 				new Weapon("caeruleum-eteriusArtillery"){{
 					x = 74 / 4;
 					y = -76 / 4;
 					reload = 30;
-					shootSound = Sounds.shootSnap;
+					shootSound = Sounds.shootArtillery;
 					recoil = 3;
 					rotate = true;
 					bullet = new ArtilleryBulletType(){{
@@ -345,7 +345,7 @@ public class CaeUnits{
 					top = false;
 					reload = 15;
 					ejectEffect = Fx.lightningShoot;
-					shootSound = Sounds.laser;
+					shootSound = Sounds.shootLancer;
 					bullet = CaeBullets.standardOverseer;
 				}}
 			);
@@ -369,7 +369,7 @@ public class CaeUnits{
 					top = false;
 					reload = 25;
 					ejectEffect = Fx.lightningShoot;
-					shootSound = Sounds.laser;
+					shootSound = Sounds.shootLancer;
 					bullet = CaeBullets.mediumOverseer;
 				}}
 			);
@@ -401,7 +401,7 @@ public class CaeUnits{
 					reload = 60;
 					top = false;
 					ejectEffect = Fx.lightningShoot;
-					shootSound = Sounds.laser;
+					shootSound = Sounds.shootLancer;
 					shoot.shots = 4;
 					inaccuracy = 15;
 					bullet = CaeBullets.mediumOverseer;
@@ -415,99 +415,7 @@ public class CaeUnits{
 					rotate = true;
 					rotateSpeed = 3.5f;
 					ejectEffect = Fx.lightningShoot;
-					shootSound = Sounds.laser;
-					bullet = CaeBullets.mediumOrbiter;
-					recoil = 4;
-				}}
-			);
-		}};
-
-		pugione = new UnitType("pugione"){{
-			speed = 0.6f;
-			hitSize = 11;
-			health = 300;
-			maxRange = 120;
-			range = 120;
-			
-			targetAir = false;
-			armor = 3;
-			aiController = GroundAI::new;
-			constructor = MechUnit::create;
-
-			weapons.add(
-				new Weapon("caeruleum-pugioneWeapon"){{
-					reload = 20;
-					x = 5;
-					y = 0;
-					top = false;
-					ejectEffect = Fx.none;
-					shootSound = Sounds.shotgun;
-					shootY = 4.75f;
-					recoil = -4; //negative so it looks like it's punching
-					range = 80;
-					soundPitchMin = 0.42f;
-					soundPitchMax = 1.74f;
-					rotate = true;
-					rotateSpeed = 60;
-					bullet = CaeBullets.standardSpike;
-				}}
-			);
-		}};
-
-		mucro = new UnitType("mucro"){{
-			speed = 0.45f;
-			hitSize = 11.75f;
-			health = 675;
-			targetAir = false;
-			maxRange = 170;
-			range = 170;
-			
-			armor = 4;
-			aiController = GroundAI::new;
-			constructor = MechUnit::create;
-
-			weapons.add(
-				new Weapon("caeruleum-mucroWeapon"){{
-					x = 24 / 4;
-					y = 0;
-					reload = 30;
-					top = false;
-					ejectEffect = Fx.none;
-					shootSound = Sounds.shotgun;
-					shootY = 30 / 4;
-					recoil = -4; //negative so it looks like it's punching
-					targetAir = false;
-					soundPitchMin = 0.42f;
-					soundPitchMax = 1.74f;
-					rotate = true;
-					rotateSpeed = 60f;
-					bullet = CaeBullets.mediumSpike;
-					shoot = new ShootSpread(4, 22.5f);
-					shoot.shotDelay = 5;
-				}}
-			);
-		}};
-
-		tragula = new UnitType("tragula"){{
-			speed = 0.4f;
-			hitSize = 15;
-			health = 1175;
-			targetAir = false;
-			maxRange = 180;
-			range = 180;
-			armor = 9;
-			mechFrontSway = 0.55f;
-			aiController = GroundAI::new;
-			constructor = MechUnit::create;
-
-			weapons.add(
-				new Weapon("caeruleum-tragulaWeapon"){{
-					x = 8;
-					y = 1;
-					reload = 40;
-					top = false;
-					ejectEffect = Fx.none;
-					shootSound = Sounds.shotgun;
+					shootSound = Sounds.shootFuse;
 					shootY = 35 / 4;
 					recoil = -4; //negative so it looks like it's punching
 					targetAir = false;
@@ -515,7 +423,7 @@ public class CaeUnits{
 					soundPitchMax = 1.74f;
 					rotate = true;
 					rotateSpeed = 60;
-					bullet = CaeBullets.highSpike;
+					bullet = CaeBullets.standardOrbiter;
 				}}
 			);
 		}};
@@ -542,7 +450,7 @@ public class CaeUnits{
 					reload = 20;
 					top = false;
 					ejectEffect = Fx.none;
-					shootSound = Sounds.shotgun;
+					shootSound = Sounds.shootFuse;
 					shootY = 43 / 4;
 					recoil = -4; //negative so it looks like it's punching
 					targetAir = false;
@@ -559,7 +467,7 @@ public class CaeUnits{
 					mirror = false;
 					top = false;
 					ejectEffect = Fx.none;
-					shootSound = Sounds.place;
+					shootSound = Sounds.blockPlace1;
 					shootY = 35 / 4;
 					targetAir = false;
 					soundPitchMin = 0.42f;
@@ -604,7 +512,7 @@ public class CaeUnits{
 					reload = 35;
 					top = false;
 					ejectEffect = Fx.none;
-					shootSound = Sounds.shotgun;
+					shootSound = Sounds.shootFuse;
 					shootY = 62 / 4;
 					recoil = -5;
 					targetAir = false;
@@ -626,7 +534,7 @@ public class CaeUnits{
 					mirror = false;
 					top = false;
 					ejectEffect = Fx.none;
-					shootSound = Sounds.place;
+					shootSound = Sounds.blockPlace2;
 					shootY = 35 / 4;
 					targetAir = false;
 					soundPitchMin = 0.42f;

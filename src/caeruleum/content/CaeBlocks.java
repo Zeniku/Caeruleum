@@ -11,6 +11,7 @@ import mindustry.entities.pattern.ShootAlternate;
 import mindustry.entities.pattern.ShootPattern;
 import mindustry.entities.pattern.ShootSummon;
 import mindustry.game.Team;
+import mindustry.gen.Sounds;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.defense.turrets.PowerTurret;
@@ -30,7 +31,7 @@ public class CaeBlocks {
     bluonixite, bluonixiteWall, bluonixiteBoulder, bluonixiteWater, lazurigrass, lazurigrassWall, 
     
     aquafluent, deepAquafluent,
-    bush, blueFlower, blueTendrils, 
+    bush, blueFlower, blueTendrils, blueTree, blueTreeDead,
     caeruleumOre, rubrariumOre, virideaurumOre,
     //distribution
     lonsdaleiteDuct,
@@ -106,6 +107,24 @@ public class CaeBlocks {
             lazurigrass.asFloor().decoration = this;
         }};
         bush = new Seaweed("bluBush"){{
+            variants = 5;
+        }};
+        blueTree = new TreeBlock("blue-tree"){{
+            variants = 3;
+            breakable = true;
+            alwaysReplace = true;
+            instantDeconstruct = true;
+            unitMoveBreakable = true;
+            breakEffect = Fx.breakProp;
+            breakSound = Sounds.rockBreak;
+        }};
+        blueTreeDead = new TreeBlock("blue-tree-dead"){{
+            breakable = true;
+            alwaysReplace = true;
+            instantDeconstruct = true;
+            unitMoveBreakable = true;
+            breakEffect = Fx.breakProp;
+            breakSound = Sounds.rockBreak;
             variants = 3;
         }};
         lazurigrassWall = new StaticWall("lazurigrass-wall"){{

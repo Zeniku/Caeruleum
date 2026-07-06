@@ -2,8 +2,7 @@ package caeruleum.content;
 
 import arc.graphics.Color;
 import caeruleum.maps.planet.CaeruleumPlanetGenerator;
-import caeruleum.maps.planet.TestGeneration;
-import mindustry.content.Items;
+import caeruleum.maps.planet.*;
 import mindustry.content.Planets;
 import mindustry.game.Team;
 import mindustry.graphics.g3d.HexMesh;
@@ -13,7 +12,7 @@ import mindustry.type.Planet;
 
 
 public class CaePlanets {
-    public static Planet caeruleumPlanet, die;
+    public static Planet caeruleumPlanet, die, dient;
     
     public static void load(){
         caeruleumPlanet = new Planet("caeruleum", Planets.sun, 1f, 2){{
@@ -27,7 +26,6 @@ public class CaePlanets {
             launchCapacityMultiplier = 0.5f;
             sectorSeed = 2;
             allowWaves = true;
-            allowWaveSimulation = true;
             allowSectorInvasion = true;
             allowLaunchSchematics = true;
             enemyCoreSpawnReplace = true;
@@ -46,15 +44,13 @@ public class CaePlanets {
             startSector = 15;
             alwaysUnlocked = true;
             landCloudColor = Color.valueOf("363f9a").cpy().a(0.5f);
-            hiddenItems.addAll(Items.erekirItems).removeAll(Items.serpuloItems);
         }};
-    die = new Planet("die", caeruleumPlanet, 0.5f, 2){{
-        generator = new TestGeneration();
+    die = new Planet("die", caeruleumPlanet, 1f, 2){{
+        generator = new TestGenRefractored();
         meshLoader = () -> new HexMesh(this, 6);
             launchCapacityMultiplier = 0.5f;
             sectorSeed = 2;
             allowWaves = true;
-            allowWaveSimulation = true;
             allowSectorInvasion = true;
             allowLaunchSchematics = true;
             enemyCoreSpawnReplace = true;

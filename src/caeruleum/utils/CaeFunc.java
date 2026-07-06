@@ -17,18 +17,14 @@ public class CaeFunc{
     });
 	};
 	public static void checkEffect(float range, Position pos, boolean condition, boolean aura, Effect effect, float amount){
-		if(condition){
-	    if(aura){
-		    for(int i = 0; i < amount; i++){
-					if(effect != Fx.none){
-					  effect.at(pos.getX() + Angles.trnsx(Mathf.random(360), Mathf.random(range)), pos.getY() + Angles.trnsy(Mathf.random(360), Mathf.random(range)));
-					};
-		    };
-		  }else{
-		  	if(effect != Fx.none){
-		      effect.at(pos.getX(), pos.getY());
-		    };
-	    };
-	  };
+		if(!(effect != Fx.none)) return;
+		if(!condition) return;
+		if(aura){
+			for(int i = 0; i < amount; i++){
+				effect.at(pos.getX() + Angles.trnsx(Mathf.random(360), Mathf.random(range)), pos.getY() + Angles.trnsy(Mathf.random(360), Mathf.random(range)));
+			};
+		}else{
+			effect.at(pos.getX(), pos.getY());
+		};
 	};
 };

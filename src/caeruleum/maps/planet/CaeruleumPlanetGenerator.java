@@ -10,6 +10,7 @@ import arc.math.geom.Point2;
 import arc.math.geom.Vec2;
 import arc.math.geom.Vec3;
 import arc.struct.FloatSeq;
+import arc.struct.IntSeq;
 import arc.struct.ObjectMap;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
@@ -110,55 +111,40 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
       return res;
     };
 
+    @Override
+    public boolean isEmissive(){
+        return true;
+    };
 
     @Override
-    public void generateSector(Sector sector) {
-
-        //these always have bases
-        if (sector.id == 154 || sector.id == 0) {
-            sector.generateEnemyBase = true;
-            return;
-        }
-
-        PlanetGrid.Ptile tile = sector.tile;
-
-        boolean any = false;
-        float poles = Math.abs(tile.v.y);
-        float noise = Noise.snoise3(tile.v.x, tile.v.y, tile.v.z, 0.001f, 0.58f);
-
-        if (noise + poles / 7.1 > 0.12 && poles > 0.23) {
-            any = true;
-        }
-
-        if (noise < 0.16) {
-            for (PlanetGrid.Ptile other : tile.tiles) {
-                var osec = sector.planet.getSector(other);
-
-                //no sectors near start sector!
-                if (
-                        osec.id == sector.planet.startSector || //near starting sector
-                        osec.generateEnemyBase && poles < 0.85 || //near other base
-                        (sector.preset != null && noise < 0.11) //near preset
-                ) {
-                    return;
-                }
-            }
-        }
-
-        sector.generateEnemyBase = any;
+    public void onSectorCaptured(Sector sector){
+        sector.planet.reloadMeshAsync();
     }
 
     @Override
+    public void onSectorLost(Sector sector){
+        sector.planet.reloadMeshAsync();
+    }
+    @Override
+    public void beforeSaveWrite(Sector sector){
+        sector.planet.reloadMeshAsync();
+    }
+
+    
+
+    @Override
     public void genTile(Vec3 position, TileGen tile) {
-        tile.floor = getBlock(position);
+        tile.floor = getBlock(position, false);
         tile.block = tile.floor.asFloor().wall;
+
+        if(tile.block == null) tile.block = Blocks.air;
 
         if (Ridged.noise3d(seed + 1, position.x, position.y, position.z, 2, 22) > 0.31) {
             tile.block = Blocks.air;
         }
     }
 
-    Block getBlock(Vec3 position) {
+    Block getBlock(Vec3 position, boolean visualOnly) {
         float height = rawHeight(position);
 
         Tmp.v31.set(position);
@@ -177,7 +163,10 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
 
         float tar = Simplex.noise3d(seed, 4, 0.55f, 1f / 2f, position.x, position.y + 999f, position.z) * 0.3f + Tmp.v31.dst(0, 0, 1f) * 0.2f;
         Block res = terrain[Mathf.clamp((int) (height * terrain.length), 0, terrain.length - 1)];
-        
+        if (res == null) {
+                    return Blocks.darksand; 
+        }
+        if(visualOnly) return res;
         if (tar > 0.5f) {
             return tars.get(res, res);
         } else {
@@ -186,11 +175,11 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
     }
 
     @Override
-    public Color getColor(Vec3 position) {
-        Block block = getBlock(position);
+    public void getColor(Vec3 position, Color out) {
+        Block block = getBlock(position,true);
         //replace salt with sand color
-        if (block == Blocks.salt) return Blocks.darksand.mapColor;
-        return Tmp.c1.set(block.mapColor).a(1f - block.albedo);
+        if (block == Blocks.salt) block = Blocks.darksand;
+        out.set(block.mapColor).a(1f - block.albedo);
     }
 
     @Override
@@ -308,7 +297,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
             }
 
             //check positions on the map to place the player spawn. this needs to be in the corner of the map
-            Room spawn = null; // spawn room
+            Room spawn = null; // temp room
             Seq<Room> enemies = new Seq<>(); //enemies spawnrooms
             int enemySpawns = rand.random(1, Math.max((int) (sector.threat * 4), 1)); // howmany eniemies spawn
             
@@ -584,7 +573,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                 dec:
                 {
                     for (int i = 0; i < 4; i++) {
-                        Tile near = world.tile(x + Geometry.d4[i].x, y + Geometry.d4[i].y);
+                        Tile near = tiles.get(x + Geometry.d4[i].x, y + Geometry.d4[i].y);
                         if (near != null && near.block() != Blocks.air) {
                             break dec;
                         }
@@ -597,6 +586,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
             });
 
             float difficulty = sector.threat;
+            IntSeq ints = new IntSeq(width * height / 4);
             ints.clear();
             ints.ensureCapacity(width * height / 4);
 
@@ -641,7 +631,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
                     }
 
                     //actually place the part
-                    if (part != null && BaseGenerator.tryPlace(part, x, y, Team.derelict, (cx, cy) -> {
+                    if (part != null && BaseGenerator.tryPlace(part, x, y, Team.derelict, rand, (cx, cy) -> {
                         Tile other = tiles.getn(cx, cy);
                         if (other.floor().hasSurface()) {
                             other.setOverlay(Blocks.oreScrap);
@@ -690,7 +680,7 @@ public class CaeruleumPlanetGenerator extends PlanetGenerator {
 
             if (sector.hasEnemyBase()) {
                 basegen.generate(tiles, enemies.map(r -> tiles.getn(r.x, r.y)), tiles.get(spawn.x, spawn.y), state.rules.waveTeam, sector, difficulty);
-
+                
                 state.rules.attackMode = sector.info.attack = true;
             } else {
                 state.rules.winWave = sector.info.winWave = 10 + 5 * (int) Math.max(difficulty * 10, 1);

@@ -58,9 +58,10 @@ allprojects{
     sourceSets["main"].java.setSrcDirs(
         listOf(
             layout.projectDirectory.dir("src"),
-            file("build/generated/source/kapt/main") // So jdtls can see and not scream at me
         )
     )
+
+sourceSets["main"].java.srcDir("build/generated/source/kapt/main/")
     configurations.configureEach{
         // Resolve the correct Mindustry dependency, and force Arc version.
         resolutionStrategy.eachDependency{
