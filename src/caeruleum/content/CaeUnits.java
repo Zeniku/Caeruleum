@@ -3,7 +3,6 @@ package caeruleum.content;
 import arc.graphics.*;
 import mindustry.content.*;
 import mindustry.entities.bullet.*;
-import mindustry.entities.pattern.ShootSpread;
 import mindustry.ai.types.*;
 import mindustry.gen.*;
 import mindustry.type.*;

@@ -1,4 +1,5 @@
 <factorypath>
-    <factorypathentry kind="EXTJAR" id="/data/data/com.termux/files/home/.gradle/caches/modules-2/files-2.1/com.github.GglLfr.EntityAnno/downgrader/v158.0.0/1adf8358dd70bb35e83a78fa5d061d6886715d67/downgrader-v158.0.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="EXTJAR" id="/data/data/com.termux/files/home/.gradle/caches/modules-2/files-2.1/com.github.Anuken.Arc/arc-core/v158.1/c101db02894acba4c389d6003bc89d45e112fe2c/arc-core-v158.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\User\.gradle\caches\8.11.1\transforms\d8613540d46319f1536e2cd768cb890b\transformed\javapoet-1.13.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\User\.gradle\caches\8.11.1\transforms\c9856e60b058e571d5398b781e601b89\transformed\Mindustry-v160.5.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\User\.gradle\caches\8.11.1\transforms\79ea18f8b9bf36f775f672819be5ae27\transformed\entity-v2.1.0+v160.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>

@@ -1,4 +1,3 @@
-
 package caeruleum.maps.planet;
 
 import arc.graphics.Color;
@@ -8,9 +7,13 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.noise.*;
 import caeruleum.content.CaeBlocks;
-import caeruleum.maps.utils.CaeRoomManager;
-import caeruleum.maps.utils.CaeRoomManager.Room;
-import caeruleum.maps.utils.CaeRoomManager.RoomHandler;
+import caeruleum.maps.utils.CaeBasicGenerator;
+import caeruleum.maps.utils.CaeMapUtilities;
+import caeruleum.maps.utils.CaeRoom;
+import caeruleum.maps.utils.CaeChunk;
+import caeruleum.maps.utils.managers.CaeChunkHandler;
+import caeruleum.maps.utils.managers.CaeRoomManager.RoomHandler;
+import caeruleum.maps.utils.managers.ForestManager;
 import caeruleum.utils.noise.CaeNoise;
 import mindustry.content.*;
 import mindustry.game.*;
@@ -19,7 +22,7 @@ import mindustry.world.*;
 import mindustry.world.blocks.environment.Floor;
 
 
-public class TestGenRefractored extends CaeMapUtils {
+public class TestGenRefractored extends CaeBasicGenerator {
 
     // Configuration
     public float oceanFloorDepth = 1.3f, oceanFloorSmoothing = 1.3f, oceanDepthMultiplier = 0.5f;
@@ -38,6 +41,10 @@ public class TestGenRefractored extends CaeMapUtils {
 
     // Generator State
     private final BaseGenerator basegen = new BaseGenerator();
+    private CaeMapUtilities mapUtils = new CaeMapUtilities(this);
+    private RoomHandler roomHandler = new RoomHandler(this, mapUtils);
+    private CaeChunkHandler chunkHandler = new CaeChunkHandler(this, mapUtils);
+    private ForestManager forestManager = new ForestManager(this, mapUtils);
     
     // Blocks
     private final Block[] terrain = {
@@ -66,12 +73,13 @@ public class TestGenRefractored extends CaeMapUtils {
     private final Seq<Block> basicOres = Seq.with(Blocks.oreCopper, Blocks.oreLead);
 
     // --- Noise & Height Logic ---
-
-    private boolean withinCrater(Vec3 position, float buffer) {
+@Override 
+    public boolean withinCrater(Vec3 position, float buffer) {
         return position.within(crater, craterRadius + buffer);
     }
-
-    private float rawHeight(Vec3 position) {
+    
+    @Override 
+    public float rawHeight(Vec3 position) {
         // Use Tmp.v33 to avoid allocation, apply scale
         Vec3 pos = Tmp.v33.set(position).scl(noiseScale);
         
@@ -105,7 +113,8 @@ public class TestGenRefractored extends CaeMapUtils {
         out.set(block.mapColor).a(1f - block.albedo);
     }
 
-    Block getBlock(Vec3 position, boolean visualOnly) {
+    @Override 
+    public Block getBlock(Vec3 position, boolean visualOnly) {
         float height = rawHeight(position);
         
         // Crater Terrain
@@ -160,7 +169,7 @@ public class TestGenRefractored extends CaeMapUtils {
         cells(4);
         distort(10f, 12f);
 
-        RoomHandler roomHandler = new RoomHandler(this);
+        chunkHandler.initChunks(width, height, 32);
         roomHandler.init();
         
         roomHandler.makeRooms(rand.random(5, 7));
@@ -191,11 +200,10 @@ public class TestGenRefractored extends CaeMapUtils {
 
         roomHandler.ocean = (float) waters / total >= 0.65f;
 
-        roomHandler.forest = (float) grass / total >= 0.19f;
 
         roomHandler.cave = (float) rocks / total >= 0.19f; 
         //render rooms
-        for(Room room : roomHandler.roomseq){
+        for(CaeRoom room : roomHandler.roomseq){
           roomHandler.renderRoom(room);
         }
 
@@ -205,11 +213,11 @@ public class TestGenRefractored extends CaeMapUtils {
 
         // connect to the rooms
         roomHandler.connectRooms(roomHandler.spawn);
-        for (Room room : roomHandler.roomseq) {
+        for (CaeRoom room : roomHandler.roomseq) {
             if(roomHandler.ocean && (float) rand.random(0, 1) > 0.5f) roomHandler.spawn.connectIslandsWater(room);
         }
 
-        Room fspawn = roomHandler.spawn;
+        CaeRoom fspawn = roomHandler.spawn;
 
         
         distort(10f, 6f);
@@ -218,42 +226,42 @@ public class TestGenRefractored extends CaeMapUtils {
         cells(1);
 
         if (roomHandler.naval) {
-            for (Room room : roomHandler.enemies) room.connectLiquid(roomHandler.spawn);
+            for (CaeRoom room : roomHandler.enemies) room.connectLiquid(roomHandler.spawn);
         }
 
         distort(10f, 6f);
 
         // Shoreline Smoothing
-        smoothWater(3, false); // Normal shoreline
+        mapUtils.smoothWater(3, false); // Normal shoreline
         if (roomHandler.naval) {
-            smoothWater(2, true); // Deep water smoothing
+            mapUtils.smoothWater(2, true); // Deep water smoothing
         }
 
         // 5. Resources (Ores)
-        generateOres(basicOres);
+        mapUtils.generateOres(basicOres);
         trimDark();
         median(2);
         inverseFloodFill(tiles.getn(roomHandler.spawn.x, roomHandler.spawn.y));
         tech();
 
-        if(roomHandler.forest){
-          generateDensityForest(4, 3);
-          generateRivers(roomHandler.spawn);
+        if(chunkHandler.has(CaeChunk.Biome.FOREST)){
+            forestManager.generateHybridForest(chunkHandler, 3);
+            mapUtils.generateRivers(roomHandler.spawn);
           //generateVegetation(roomHandler.roomseq, dec, genLakes);
         }
         if(roomHandler.cave){
-            generateCaveDecorations(roomHandler.roomseq, dec, genLakes);
+            mapUtils.generateCaveDecorations(roomHandler.roomseq, dec, genLakes);
         }
 
         if(roomHandler.ocean){
             //plan to add island generation
         }
 
-        generateRuins(roomHandler.spawn, new IntSeq(width * height / 4));
+        mapUtils.generateRuins(roomHandler.spawn, new IntSeq(width * height / 4));
         
         Schematics.placeLaunchLoadout(roomHandler.spawn.x, roomHandler.spawn.y);
-        for (Room espawn : roomHandler.enemies) tiles.getn(espawn.x, espawn.y).setOverlay(Blocks.spawn);
+        for (CaeRoom espawn : roomHandler.enemies) tiles.getn(espawn.x, espawn.y).setOverlay(Blocks.spawn);
 
-        setupRules(roomHandler.enemies, roomHandler.spawn, roomHandler.naval, basegen);
+        mapUtils.setupRules(roomHandler.enemies, roomHandler.spawn, roomHandler.naval, basegen);
     }
 }

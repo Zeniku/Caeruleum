@@ -35,7 +35,6 @@ public class CaePlanets {
             ruleSetter = r -> {
                 r.waveTeam = Team.blue;
                 r.placeRangeCheck = false;
-                r.showSpawns = false;
             };
             iconColor = Color.valueOf("7d4dff");
             atmosphereColor = CaeBlocks.deepAquafluent.mapColor;
@@ -60,7 +59,6 @@ public class CaePlanets {
             ruleSetter = r -> {
                 r.waveTeam = Team.blue;
                 r.placeRangeCheck = false;
-                r.showSpawns = false;
             };
             iconColor = Color.valueOf("7d4dff");
             atmosphereColor = CaeBlocks.deepAquafluent.mapColor;

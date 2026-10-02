@@ -1,54 +1,62 @@
+package caeruleum.maps.utils;
 
-package caeruleum.maps.planet;
-
-import arc.func.*;
-import arc.math.*;
-import arc.math.geom.*;
-import arc.struct.*;
-import arc.util.*;
+import arc.func.Boolf;
+import arc.func.Intc2;
+import arc.math.Mathf;
+import arc.math.Rand;
+import arc.math.geom.Geometry;
+import arc.math.geom.Point2;
+import arc.math.geom.Vec3;
+import arc.struct.FloatSeq;
+import arc.struct.GridBits;
+import arc.struct.IntSeq;
+import arc.struct.ObjectMap;
+import arc.struct.Seq;
+import arc.util.Nullable;
+import arc.util.Structs;
 import arc.util.noise.Ridged;
 import arc.util.noise.Simplex;
 import caeruleum.content.CaeBlocks;
-import caeruleum.maps.utils.CaeRoomManager.Room;
+import caeruleum.maps.utils.managers.CaeChunkHandler;
 import mindustry.ai.BaseRegistry;
-import mindustry.content.*;
+import mindustry.content.Blocks;
+import mindustry.content.Liquids;
 import mindustry.game.Team;
 import mindustry.game.Waves;
-import mindustry.type.Sector;
 import mindustry.maps.generators.BaseGenerator;
-import mindustry.maps.generators.PlanetGenerator;
-import mindustry.world.*;
+import mindustry.type.Sector;
+import mindustry.world.Block;
+import mindustry.world.Tile;
+import mindustry.world.Tiles;
 import mindustry.world.blocks.environment.Floor;
 
 import static mindustry.Vars.*;
 
-public abstract class CaeMapUtils extends PlanetGenerator {
-    
-    // --- Island Generation ---
+public class CaeMapUtilities {
+    private CaeBasicGenerator gen;
+    private Floor floor = null;
+    private Block block = null;
+    private Block ore = null;
 
-    public Rand getRand(){ return this.rand; };
-    public Sector getSector() {return this.sector;};
-    public int getMapWidth(){ return this.width; };
-    public int getMapHeight(){ return this.height; };
-    public Tiles getTiles(){ return this.tiles; };
+    public CaeMapUtilities(CaeBasicGenerator gen) {
+        this.gen = gen;
+    }
+    public void pass(Intc2 r){
+        for (Tile tile : gen.getTiles()) {
+            floor = tile.floor();
+            block = tile.block();
+            ore = tile.overlay();
+            r.get(tile.x, tile.y);
 
-    public float getNoise(float x, float y, float scl, float mag){
-        return noise(x, y, scl, mag);
+            tile.setFloor(floor.asFloor());
+            if(block != tile.block()) tile.setBlock(block);
+            tile.setOverlay(ore);
+        }
     }
-    public float getNoise(float x, float y, float octaves, float falloff, float scl){
-        return noise(x, y, octaves, falloff, scl);
-    }
-    public float getNoise(float x, float y, float octaves, float falloff, float scl, float mag){
-        return noise(x, y, octaves, falloff, scl, mag);
-    }
-    public void getNoise(Floor floor, Block block, int octaves, float falloff, float scl, float threshold){
-         noise(floor, block, octaves, falloff, scl, threshold);
-    }
-    
     public void makeOrganicIsland(int cx, int cy, int baseRadius, Floor inner, Floor outer) {
         int padding = 15; // Extra space for the noise to push outward
         int maxRadius = baseRadius + padding;
-        
+        Tiles tiles = gen.getTiles();
         scanCircle(cx, cy, maxRadius, (wx, wy, dst2) -> {
             Tile tile = tiles.getn(wx, wy);
             if (!tile.floor().isLiquid) return; // Don't overwrite existing land
@@ -58,7 +66,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
             
             // 2. Sample low-frequency noise to warp the coastline
             // The noise returns roughly -1.0 to 1.0
-            float edgeNoise = noise(wx, wy, 3, 0.5, 20f) * 0.45f; 
+            float edgeNoise = gen.getNoisef(wx, wy, 3f, 0.5f, 20f) * 0.45f; 
             
             // 3. Combine distance and noise
             float finalDist = dist + edgeNoise;
@@ -73,6 +81,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
 
     public void makeIsland(int x, int y, int radius, int miniAmount, int distFromBig) {
         // Fix: Use sin for Y, fix loop condition
+        Rand rand = gen.getRand();
         float slice = 360f / miniAmount;
         for (int i = 0; i < miniAmount; i++) {
             int miniRadius = (radius / miniAmount);
@@ -99,7 +108,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
     public void makeIsland(int x, int y, int radius, int outerOffset, Floor inner, @Nullable Floor outer) {
         int r2 = radius * radius;
         int r2Outer = (radius + outerOffset) * (radius + outerOffset);
-
+        Tiles tiles = gen.getTiles();
         // Optimized circle iteration
         scanCircle(x, y, radius + outerOffset, (wx, wy, dst2) -> {
             Tile other = tiles.getn(wx, wy);
@@ -115,6 +124,8 @@ public abstract class CaeMapUtils extends PlanetGenerator {
 
     /** Optimized circle scanner that avoids checking bounds every pixel */
     public void scanCircle(int x, int y, int radius, CircleCons cons) {
+        int width = gen.getMapWidth();
+        int height = gen.getMapHeight();
         for (int cx = -radius; cx <= radius; cx++) {
             for (int cy = -radius; cy <= radius; cy++) {
                 int dst2 = cx * cx + cy * cy;
@@ -136,7 +147,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
 
     public void refineWater(int radius, boolean deepMode, Floor check, Floor replace, Floor retain) {
         int r2 = radius * radius;
-        
+        Tiles tiles = gen.getTiles();
         pass((x, y) -> {
             boolean isTarget = deepMode 
                 ? (floor.asFloor().isLiquid && !floor.asFloor().isDeep() && !floor.asFloor().shallow)
@@ -165,6 +176,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
     public int countTiles(int x, int y, int radius, Boolf<Tile> predicate) {
         int count = 0;
         int r2 = radius * radius;
+        Tiles tiles = gen.getTiles();
         for (int cx = -radius; cx <= radius; cx++) {
             for (int cy = -radius; cy <= radius; cy++) {
                 if (cx * cx + cy * cy <= r2) {
@@ -180,6 +192,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
 
     public int countWater(int cx, int cy, int range) {
         int waterTiles = 0;
+        Tiles tiles = gen.getTiles();
         for (int rx = -range; rx <= range; rx++) {
             for (int ry = -range; ry <= range; ry++) {
                 Tile tile = tiles.get(cx + rx, cy + ry);
@@ -192,6 +205,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
     }
 
     protected boolean checkNavalStatus() {
+        Tiles tiles = gen.getTiles();
         int tlen = tiles.width * tiles.height;
         int waters = 0;
         int totalAir = 0;
@@ -240,8 +254,10 @@ public abstract class CaeMapUtils extends PlanetGenerator {
         
         return read;
     }
-
+    
     public void generateDensityForest(int blurIterations, int cradius) {
+        Tiles tiles = gen.getTiles();
+        Rand rand = gen.getRand();
         float[][] density = new float[tiles.width][tiles.height];
         float[][] write = new float[tiles.width][tiles.height];
 
@@ -302,7 +318,8 @@ public abstract class CaeMapUtils extends PlanetGenerator {
         });
     }
 
-    protected void generateRivers(Room spawn) {
+    public void generateRivers(CaeRoom spawn) {
+        Sector sector = gen.getSector();
         pass((x, y) -> {
             if (block.solid) return;
 
@@ -317,17 +334,17 @@ public abstract class CaeMapUtils extends PlanetGenerator {
                 
                 if (floor != Blocks.ice && floor != Blocks.iceSnow && floor != Blocks.snow && !floor.asFloor().isLiquid) {
                     if (spore) {
-                        floor = deep ? CaeBlocks.bluonixiteWater : Blocks.darksandWater;
+                        floor = deep ? (Floor) CaeBlocks.bluonixiteWater : (Floor) Blocks.darksandWater;
                     } else {
-                        floor = deep ? Blocks.water : 
-                               (floor == Blocks.sand || floor == Blocks.salt ? Blocks.sandWater : Blocks.darksandWater);
+                        floor = deep ? (Floor) Blocks.water : 
+                               (floor == Blocks.sand || floor == Blocks.salt ? (Floor) Blocks.sandWater : (Floor) Blocks.darksandWater);
                     }
                 }
             }
         });
     }
 
-    protected void smoothWater(int deepRadius, boolean navalMode) {
+    public void smoothWater(int deepRadius, boolean navalMode) {
         pass((x, y) -> {
             // Logic selection based on mode
             boolean condition = navalMode 
@@ -338,7 +355,7 @@ public abstract class CaeMapUtils extends PlanetGenerator {
                 for (int cx = -deepRadius; cx <= deepRadius; cx++) {
                     for (int cy = -deepRadius; cy <= deepRadius; cy++) {
                         if (cx*cx + cy*cy <= deepRadius*deepRadius) {
-                            Tile tile = tiles.get(cx + x, cy + y);
+                            Tile tile = gen.getTiles().get(cx + x, cy + y);
                             
                             boolean breakCondition = navalMode
                                 ? (tile != null && (tile.floor().shallow || !tile.floor().isLiquid))
@@ -350,25 +367,27 @@ public abstract class CaeMapUtils extends PlanetGenerator {
                 }
                 
                 if (navalMode) {
-                    floor = (floor == Blocks.water) ? Blocks.deepwater : CaeBlocks.bluonixiteWater;
+                    floor = (floor == Blocks.water) ? (Floor) Blocks.deepwater : (Floor) CaeBlocks.bluonixiteWater;
                 } else {
-                    floor = (floor == Blocks.darksandWater) ? CaeBlocks.bluonixiteWater : Blocks.water;
+                    floor = (floor == Blocks.darksandWater) ? (Floor) CaeBlocks.bluonixiteWater : (Floor) Blocks.water;
                 }
             }
         });
     }
 
-    protected void generateOres(Seq<Block> basicOres) {
+    public void generateOres(Seq<Block> basicOres) {
+        Sector sector = gen.getSector();
+        Rand rand = gen.getRand();
         Seq<Block> ores = new Seq<>(basicOres);
         float poles = Math.abs(sector.tile.v.y);
         float scl = 1f;
 
         // Dynamic Ore Addition
-        if (Simplex.noise3d(seed, 2, 0.5, scl, sector.tile.v.x, sector.tile.v.y, sector.tile.v.z) * 0.5f + poles > 0.325f)
+        if (Simplex.noise3d(gen.seed, 2, 0.5, scl, sector.tile.v.x, sector.tile.v.y, sector.tile.v.z) * 0.5f + poles > 0.325f)
             ores.add(Blocks.oreCoal);
-        if (Simplex.noise3d(seed, 2, 0.5, scl, sector.tile.v.x + 1, sector.tile.v.y, sector.tile.v.z) * 0.5f + poles > 0.65f)
+        if (Simplex.noise3d(gen.seed, 2, 0.5, scl, sector.tile.v.x + 1, sector.tile.v.y, sector.tile.v.z) * 0.5f + poles > 0.65f)
             ores.add(Blocks.oreTitanium);
-        if (Simplex.noise3d(seed, 2, 0.5, scl, sector.tile.v.x + 2, sector.tile.v.y, sector.tile.v.z) * 0.5f + poles > 0.91f)
+        if (Simplex.noise3d(gen.seed, 2, 0.5, scl, sector.tile.v.x + 2, sector.tile.v.y, sector.tile.v.z) * 0.5f + poles > 0.91f)
             ores.add(Blocks.oreThorium);
         if (rand.chance(0.25)) 
             ores.add(Blocks.oreScrap);
@@ -385,20 +404,22 @@ public abstract class CaeMapUtils extends PlanetGenerator {
             for (int i = ores.size - 1; i >= 0; i--) {
                 Block entry = ores.get(i);
                 float freq = frequencies.get(i);
-                if (Math.abs(0.5f - noise(offsetX, offsetY + i * 999, 2, 0.7, (40 + i * 2))) > 0.22f + i * 0.01 &&
-                    Math.abs(0.5f - noise(offsetX, offsetY - i * 999, 1, 1, (30 + i * 4))) > 0.37f + freq) {
+                if (Math.abs(0.5f - gen.getNoisef(offsetX, offsetY + i * 999, 2, 0.7, (40 + i * 2))) > 0.22f + i * 0.01 &&
+                    Math.abs(0.5f - gen.getNoisef(offsetX, offsetY - i * 999, 1, 1, (30 + i * 4))) > 0.37f + freq) {
                     ore = entry;
                     break;
                 }
             }
 
             if (ore == Blocks.oreScrap && rand.chance(0.33)) {
-                floor = Blocks.metalFloorDamaged;
+                floor = (Floor) Blocks.metalFloorDamaged;
             }
         });
     }
     protected void generateVegitation(){
-       pass((x, y) -> {
+        Tiles tiles = gen.getTiles();
+        Rand rand = gen.getRand();
+        pass((x, y) -> {
             // Trees
             if (rand.chance(0.0075)) {
                 boolean hasSpace = false;
@@ -417,20 +438,24 @@ public abstract class CaeMapUtils extends PlanetGenerator {
         }); 
     }
 
-    protected void generateCaveDecorations(Seq<Room> rooms, ObjectMap<Block, Block> dec ,boolean genLakes) {
+    public void generateCaveDecorations(Seq<CaeRoom> rooms, ObjectMap<Block, Block> dec ,boolean genLakes) {
+        Rand rand = gen.getRand();
+        Tiles tiles = gen.getTiles();
+        Sector sector = gen.getSector();
+
         pass((x, y) -> {
             //Tar
             if (floor == Blocks.darksand) {
-                if (Math.abs(0.5f - noise(x - 40, y, 2, 0.7, 80)) > 0.25f &&
-                    Math.abs(0.5f - noise(x, y + sector.id * 10, 1, 1, 60)) > 0.41f && 
+                if (Math.abs(0.5f - gen.getNoisef(x - 40, y, 2, 0.7, 80)) > 0.25f &&
+                    Math.abs(0.5f - gen.getNoisef(x, y + sector.id * 10, 1, 1, 60)) > 0.41f && 
                     !rooms.contains(r -> Mathf.within(x, y, r.x, r.y, 30))) {
-                    floor = Blocks.tar;
+                    floor = (Floor) Blocks.tar;
                 }
             }
             // Hotrock & Lakes
            if (floor == Blocks.hotrock) {
-                    if (Math.abs(0.5f - noise(x - 90, y, 4, 0.8, 80)) > 0.035) {
-                        floor = Blocks.basalt;
+                    if (Math.abs(0.5f - gen.getNoisef(x - 90, y, 4, 0.8, 80)) > 0.035) {
+                        floor = (Floor) Blocks.basalt;
                     } else {
                         ore = Blocks.air;
                         boolean all = true;
@@ -441,16 +466,16 @@ public abstract class CaeMapUtils extends PlanetGenerator {
                             }
                         }
                         if (all) {
-                            floor = Blocks.magmarock;
+                            floor = (Floor) Blocks.magmarock;
                         }
                     }
                 } else if (genLakes && floor != Blocks.basalt && floor != Blocks.ice && floor.asFloor().hasSurface()) {
-                    float noise = noise(x + 782, y, 5, 0.75f, 260f, 1f);
+                    float noise = gen.getNoisef(x + 782, y, 5, 0.75f, 260f, 1f);
                     if (noise > 0.67f && !rooms.contains(e -> Mathf.within(x, y, e.x, e.y, 14))) {
                         if (noise > 0.72f) {
-                            floor = noise > 0.78f ? CaeBlocks.bluonixiteWater : (floor == Blocks.sand ? Blocks.sandWater : CaeBlocks.bluonixiteWater);
+                            floor = noise > 0.78f ? (Floor) CaeBlocks.bluonixiteWater : (floor == Blocks.sand ? (Floor) Blocks.sandWater : (Floor) CaeBlocks.bluonixiteWater);
                         } else {
-                            floor = (floor == Blocks.sand ? floor : Blocks.darksand);
+                            floor = (floor == Blocks.sand ? (Floor) floor : (Floor) Blocks.darksand);
                         }
                     }
                 } 
@@ -470,7 +495,11 @@ public abstract class CaeMapUtils extends PlanetGenerator {
         });
     }
 
-    protected void generateRuins(Room spawn, IntSeq ints) {
+    public void generateRuins(CaeRoom spawn, IntSeq ints) {
+        Rand rand = gen.getRand();
+        Sector sector = gen.getSector();
+        int width = gen.getMapWidth(), height = gen.getMapHeight();
+        Tiles tiles = gen.getTiles();
         int ruinCount = rand.random(-2, 4);
         if (ruinCount <= 0) return;
 
@@ -549,7 +578,9 @@ public abstract class CaeMapUtils extends PlanetGenerator {
         }
     }
 
-    protected void setupRules(Seq<Room> enemies, Room spawn, boolean naval, BaseGenerator basegen) {
+    public void setupRules(Seq<CaeRoom> enemies, CaeRoom spawn, boolean naval, BaseGenerator basegen) {
+        Tiles tiles = gen.getTiles();
+        Sector sector = gen.getSector();
         float difficulty = sector.threat;
         
         if (sector.hasEnemyBase()) {
