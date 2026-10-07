@@ -218,131 +218,58 @@ public class CaeMapUtilities {
         }
         return (float) waters / totalAir >= 0.19f;
     }
+public void generateRivers(CaeRoom spawn) {
+    Sector sector = gen.getSector();
 
-    public GridBits applyCells(GridBits input, int width, int height, int iterations, int birthLimit, int deathLimit, int cradius) {
-        GridBits read = new GridBits(width, height);
-        GridBits write = new GridBits(width, height);
+    pass((x, y) -> {
+        // Skip solid terrain walls
+        if (block.solid) return;
+
+        // 1. Noise calculations for river mask
+        Vec3 projectedPos = sector.rect.project(x, y);
+        float noiseRipple = Simplex.noise2d(sector.id, 2, 0.6f, 1f / 7f, x, y) * 0.1f;
+        float riverNoise = Ridged.noise3d(2, projectedPos.x, projectedPos.y, projectedPos.z, 1, 1f / 55f) + noiseRipple;
+
+        // Dynamic spawn clearance padding
+        float spawnProtectionRadius = 12f + (noiseRipple * 44f - 2f);
+
+        // 2. Validate river placement and spawn protection
+        boolean isRiverPath = riverNoise > 0.17f;
+        boolean isNearSpawn = Mathf.within(x, y, spawn.x, spawn.y, spawnProtectionRadius);
+
+        if (!isRiverPath || isNearSpawn) return;
+
+        // 3. Determine depth and water block type
+        boolean isDeepWater = riverNoise > 0.27f && !Mathf.within(x, y, spawn.x, spawn.y, spawnProtectionRadius + 3f);
         
-        // Copy input into our read buffer
-        read.set(input);
+        floor = getRiverFloor(floor, isDeepWater);
+    });
+}
 
-        for (int i = 0; i < iterations; i++) {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    int alive = 0;
-
-                    for (int cx = -cradius; cx <= cradius; cx++) {
-                        for (int cy = -cradius; cy <= cradius; cy++) {
-                            if ((cx == 0 && cy == 0) || !Mathf.within(cx, cy, cradius)) continue;
-                            
-                            if (!Structs.inBounds(x + cx, y + cy, width, height) || read.get(x + cx, y + cy)) {
-                                alive++;
-                            }
-                        }
-                    }
-
-                    if (read.get(x, y)) {
-                        write.set(x, y, alive >= deathLimit);
-                    } else {
-                        write.set(x, y, alive > birthLimit);
-                    }
-                }
-            }
-            // Flush results for the next iteration
-            read.set(write);
-        }
-        
-        return read;
-    }
-    
-    public void generateDensityForest(int blurIterations, int cradius) {
-        Tiles tiles = gen.getTiles();
-        Rand rand = gen.getRand();
-        float[][] density = new float[tiles.width][tiles.height];
-        float[][] write = new float[tiles.width][tiles.height];
-
-        //initial density
-        tiles.each((x, y) -> {
-            density[x][y] = rand.chance(0.1f)? 0.7f : 0.1f;
-            if(!tiles.get(x, y).block().isAir()){
-                density[x][y] = 1.0f;
-            }
-            density[x][y] = rand.chance(0.1f)? 0.7f : 0.1f;
-        });
-
-        for (int i = 0; i < blurIterations; i++) {
-            tiles.each((x, y) -> {
-                float totalDensity = 0f;
-                int count = 0;
-
-                for (int cx = -cradius; cx <= cradius; cx++) {
-                    for (int cy = -cradius; cy <= cradius; cy++) {
-                        if (Structs.inBounds(x + cx, y + cy, tiles.width, tiles.height)) {
-                            totalDensity += density[x + cx][y + cy];
-                            count++;
-                        }
-                    }
-                }
-                write[x][y] = totalDensity / count;
-            });
-
-            // Copy the smoothed results back to the main density grid
-            for (int x = 0; x < tiles.width; x++) {
-                System.arraycopy(write[x], 0, density[x], 0, tiles.height);
-            }
-        }
-
-        //Apply the density to the world using thresholds
-        pass((x, y) -> {
-            float d = density[x][y];
-            // Only plant on valid soil
-            boolean isAir = tiles.get(x,y).block().isAir();
-            if (floor == CaeBlocks.lazurigrass && isAir){
-                if ((d > 0.57f) ) {
-                    if(x % 2 == 0 && y % 2 == 0){
-                      if(rand.chance(0.9f)) block = CaeBlocks.blueTree; 
-                    }
-                } else if (d > 0.25f && rand.chance(0.1)) {
-                    block = CaeBlocks.blueTendrils;
-                    if(rand.chance(0.5)){
-                        block = CaeBlocks.blueTree;
-                    }
-                    if(rand.chance(0.5)){
-                        block = CaeBlocks.blueFlower;
-                    }
-                    if(rand.chance(0.1)){
-                        block = CaeBlocks.blueTendrils;
-                    }
-                }
-            }
-        });
+/**
+ * Determines the river floor replacement block based on the existing terrain floor.
+ */
+private Floor getRiverFloor(Block currentFloor, boolean isDeep) {
+    // Skip liquids and frozen biomes
+    if (currentFloor.asFloor().isLiquid || 
+        currentFloor == Blocks.ice || 
+        currentFloor == Blocks.iceSnow || 
+        currentFloor == Blocks.snow) {
+        return currentFloor.asFloor();
     }
 
-    public void generateRivers(CaeRoom spawn) {
-        Sector sector = gen.getSector();
-        pass((x, y) -> {
-            if (block.solid) return;
-
-            Vec3 v = sector.rect.project(x, y);
-            float rr = Simplex.noise2d(sector.id, 2, 0.6f, 1f / 7f, x, y) * 0.1f;
-            float value = Ridged.noise3d(2, v.x, v.y, v.z, 1, 1f / 55f) + rr; // Removed - rawHeight * 0f
-            float rrscl = rr * 44 - 2;
-
-            if (value > 0.17f && !Mathf.within(x, y, spawn.x, spawn.y, 12 + rrscl)) {
-                boolean deep = value > 0.27f && !Mathf.within(x, y, spawn.x, spawn.y, 15 + rrscl);
-                boolean spore = floor != Blocks.sand && floor != Blocks.salt;
-                
-                if (floor != Blocks.ice && floor != Blocks.iceSnow && floor != Blocks.snow && !floor.asFloor().isLiquid) {
-                    if (spore) {
-                        floor = deep ? (Floor) CaeBlocks.bluonixiteWater : (Floor) Blocks.darksandWater;
-                    } else {
-                        floor = deep ? (Floor) Blocks.water : 
-                               (floor == Blocks.sand || floor == Blocks.salt ? (Floor) Blocks.sandWater : (Floor) Blocks.darksandWater);
-                    }
-                }
-            }
-        });
+    // Deep water override
+    if (isDeep) {
+        return (Floor) CaeBlocks.deepAquafluent; // Deep water variant
     }
+
+    // Shallow water variants based on underlying sand/salt terrain
+    if (currentFloor == Blocks.sand || currentFloor == Blocks.salt) {
+        return (Floor) CaeBlocks.bluonixiteWater;
+    }
+
+    return (Floor) CaeBlocks.bluonixiteWater; // Default shallow water
+}
 
     public void smoothWater(int deepRadius, boolean navalMode) {
         pass((x, y) -> {
@@ -416,27 +343,7 @@ public class CaeMapUtilities {
             }
         });
     }
-    protected void generateVegitation(){
-        Tiles tiles = gen.getTiles();
-        Rand rand = gen.getRand();
-        pass((x, y) -> {
-            // Trees
-            if (rand.chance(0.0075)) {
-                boolean hasSpace = false;
-                boolean surrounded = true;
-                for (Point2 p : Geometry.d4) {
-                    Tile other = tiles.get(x + p.x, y + p.y);
-                    if (other != null && other.block() == Blocks.air) hasSpace = true;
-                    else surrounded = false;
-                }
 
-                if (hasSpace && ((block == Blocks.snowWall || block == Blocks.iceWall) || 
-                    (surrounded && block == Blocks.air && floor == Blocks.snow && rand.chance(0.03)))) {
-                    block = rand.chance(0.5) ? Blocks.whiteTree : Blocks.whiteTreeDead;
-                }
-            }
-        }); 
-    }
 
     public void generateCaveDecorations(Seq<CaeRoom> rooms, ObjectMap<Block, Block> dec ,boolean genLakes) {
         Rand rand = gen.getRand();

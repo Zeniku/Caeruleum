@@ -18,15 +18,16 @@ import mindustry.world.blocks.environment.Floor;
 
 public class CaeChunkHandler {
     public static CaeChunkHandler current;
-    private CaeBasicGenerator gen;
-    private CaeMapUtilities utils;
     public CaeChunk[][] chunks;
+    private CaeMapUtilities utils;
+    private CaeBasicGenerator gen;
 
     public CaeChunkHandler(CaeBasicGenerator gen, CaeMapUtilities utils){
         this.gen = gen;
         this.utils = utils;
     }
-    public void initChunks(int width, int height, int chunkSize){
+
+    public void initChunks(int width, int height, int chunkSize) {
         CaeChunkHandler.current = this;
         // 1. Calculate grid size using ceiling division to ensure remaining space gets a chunk
         int chunkCols = (width + chunkSize - 1) / chunkSize;
@@ -47,13 +48,41 @@ public class CaeChunkHandler {
                 CaeChunk chunk = new CaeChunk(startX, startY, actualChunkWidth, actualChunkHeight);
                 chunk.biome = sampleChunkBiome(gen.getTiles(), chunk);
                 
-
                 chunks[x][y] = chunk;
                 Log.info("[CaeChunkHandler] Initialized chunk at (@, @) with biome: @", startX, startY, chunk.biome);
             }
         }
 
         this.updateOceanInfluence();
+    }
+    /**
+     * Retrieves the CaeChunk containing the specified tile world coordinates (x, y).
+     * Works seamlessly across standard chunks and partial boundary/corner chunks.
+     * 
+     * @param worldX Tile X coordinate on the map.
+     * @param worldY Tile Y coordinate on the map.
+     * @return The CaeChunk containing the tile, or null if out of map bounds.
+     */
+    public CaeChunk getChunkAt(int worldX, int worldY, int chunkSize) {
+        if (chunks == null || chunks.length == 0 || chunks[0].length == 0) return null;
+
+        int mapW = gen.getMapWidth();
+        int mapH = gen.getMapHeight();
+
+        // 1. Boundary check against map dimensions
+        if (worldX < 0 || worldX >= mapW || worldY < 0 || worldY >= mapH) {
+            return null;
+        }
+
+        // 2. Direct O(1) floor division translation
+        int cX = worldX / chunkSize;
+        int cY = worldY / chunkSize;
+
+        // 3. Safety clamp against array bounds (handles edge case where worldX == mapW)
+        cX = Mathf.clamp(cX, 0, chunks.length - 1);
+        cY = Mathf.clamp(cY, 0, chunks[0].length - 1);
+
+        return chunks[cX][cY];
     }
     // Centralized mapping helper
 public CaeChunk.Biome getBlockBiome(Block floor) {
@@ -74,6 +103,7 @@ public CaeChunk.Biome getBlockBiome(Block floor) {
 
     return CaeChunk.Biome.PLAINS;
 }
+
 private CaeChunk.Biome sampleChunkBiome(Tiles tiles, CaeChunk chunk) {
     // 1. CRATER CHECK: Check if chunk center falls within a crater region
     Vec3 midPos = gen.getSector().rect.project(chunk.getMidX(), chunk.getMidY());

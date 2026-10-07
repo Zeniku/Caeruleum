@@ -9,10 +9,13 @@ import mindustry.world.Tiles;
 import caeruleum.content.CaeBlocks;
 import caeruleum.maps.utils.*;
 
-public class ForestManager extends BasicManager {
+public class ForestManager{
+    private CaeMapUtilities utils;
+    private CaeBasicGenerator gen;
 
     public ForestManager(CaeBasicGenerator gen, CaeMapUtilities utils) {
-        super(gen, utils);
+        this.gen = gen;
+        this.utils = utils;
     }
 
     public void generateHybridForest(CaeChunkHandler handler, int blurIterations) {
@@ -87,11 +90,11 @@ public class ForestManager extends BasicManager {
                     validFloorTiles++;
 
                     // Normalize Simplex noise from [-1, 1] to [0, 1]
-                    float rawNoise = Simplex.noise2d(gen.getSector().id, 3, 0.5f, 1f / 12f, x, y);
-                    float detailNoise = (rawNoise + 1f) / 2f; 
+                    float rawNoise = Simplex.noise2d(gen.getSector().id, 3, 0.5f, 1, x, y);
+                    float detailNoise = (rawNoise + 1f) / 2f;
                     float finalDensity = macroDensity * detailNoise;
 
-                    if (finalDensity > 0.30f) {
+                    if (finalDensity > 0.20f) {
                         if (x % 2 == 0 && y % 2 == 0 && rand.chance(0.85f)) {
                             tile.setBlock(CaeBlocks.blueTree);
                             highDensityTreesPlaced++;

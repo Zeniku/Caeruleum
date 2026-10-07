@@ -71,7 +71,6 @@ public class CaeRoom {
             // If ANY coordinate is negative or larger than the map, force a custom crash screen!
             if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 || x1 >= mapW || y1 >= mapH || x2 >= mapW || y2 >= mapH) {
                 throw new RuntimeException(
-                    "CUSTOM DEBUG CRASH!\n" +
                     "Out of bounds detected before pathfinding.\n" +
                     "x1: " + x1 + ", y1: " + y1 + "\n" +
                     "x2: " + x2 + ", y2: " + y2 + "\n" +

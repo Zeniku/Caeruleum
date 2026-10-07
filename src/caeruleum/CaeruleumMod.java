@@ -40,7 +40,7 @@ public class CaeruleumMod extends Mod{
         Log.info("Loaded CaeruleumMod init.");
         setupChunkDebugRenderer();
     }
-private void setupChunkDebugRenderer() {
+    private void setupChunkDebugRenderer() {
         Events.run(Trigger.draw, () -> {
             // Only draw if world is loaded and chunk handler has chunks
             if (Vars.state.isMenu() || CaeChunkHandler.current == null || CaeChunkHandler.current.chunks == null) {

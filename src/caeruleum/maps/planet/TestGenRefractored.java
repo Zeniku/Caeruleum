@@ -12,7 +12,7 @@ import caeruleum.maps.utils.CaeMapUtilities;
 import caeruleum.maps.utils.CaeRoom;
 import caeruleum.maps.utils.CaeChunk;
 import caeruleum.maps.utils.managers.CaeChunkHandler;
-import caeruleum.maps.utils.managers.CaeRoomManager.RoomHandler;
+import caeruleum.maps.utils.managers.RoomHandler;
 import caeruleum.maps.utils.managers.ForestManager;
 import caeruleum.utils.noise.CaeNoise;
 import mindustry.content.*;
@@ -172,7 +172,7 @@ public class TestGenRefractored extends CaeBasicGenerator {
         chunkHandler.initChunks(width, height, 32);
         roomHandler.init();
         
-        roomHandler.makeRooms(rand.random(5, 7));
+        roomHandler.makeRooms(rand.random(5, 7), chunkHandler);
         roomHandler.makeSpawn();
 
         cells(1);
@@ -198,16 +198,14 @@ public class TestGenRefractored extends CaeBasicGenerator {
 
         roomHandler.naval = (float) waters / total >= 0.19f;
 
-        roomHandler.ocean = (float) waters / total >= 0.65f;
-
+        roomHandler.ocean = chunkHandler.has(CaeChunk.Biome.OCEAN);
 
         roomHandler.cave = (float) rocks / total >= 0.19f; 
         //render rooms
         for(CaeRoom room : roomHandler.roomseq){
-          roomHandler.renderRoom(room);
+          roomHandler.renderRoom(room, chunkHandler);
         }
 
-        
         roomHandler.connectEnemies(roomHandler.spawn);
         roomHandler.makeConnections();
 
@@ -247,7 +245,6 @@ public class TestGenRefractored extends CaeBasicGenerator {
         if(chunkHandler.has(CaeChunk.Biome.FOREST)){
             forestManager.generateHybridForest(chunkHandler, 3);
             mapUtils.generateRivers(roomHandler.spawn);
-          //generateVegetation(roomHandler.roomseq, dec, genLakes);
         }
         if(roomHandler.cave){
             mapUtils.generateCaveDecorations(roomHandler.roomseq, dec, genLakes);
