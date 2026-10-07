@@ -260,7 +260,7 @@ private Floor getRiverFloor(Block currentFloor, boolean isDeep) {
 
     // Deep water override
     if (isDeep) {
-        return (Floor) CaeBlocks.deepAquafluent; // Deep water variant
+        return (Floor) CaeBlocks.deepAquafluent;
     }
 
     // Shallow water variants based on underlying sand/salt terrain
@@ -272,34 +272,79 @@ private Floor getRiverFloor(Block currentFloor, boolean isDeep) {
 }
 
     public void smoothWater(int deepRadius, boolean navalMode) {
+        int radiusSq = deepRadius * deepRadius;
+
         pass((x, y) -> {
-            // Logic selection based on mode
-            boolean condition = navalMode 
-                ? (floor.asFloor().isLiquid && !floor.asFloor().isDeep() && !floor.asFloor().shallow)
-                : (floor.asFloor().isLiquid && floor.asFloor().shallow);
+            // 1. Only process tiles eligible for upgrading
+            if (!shouldProcessWater(floor.asFloor(), navalMode)) return;
 
-            if (condition) {
-                for (int cx = -deepRadius; cx <= deepRadius; cx++) {
-                    for (int cy = -deepRadius; cy <= deepRadius; cy++) {
-                        if (cx*cx + cy*cy <= deepRadius*deepRadius) {
-                            Tile tile = gen.getTiles().get(cx + x, cy + y);
-                            
-                            boolean breakCondition = navalMode
-                                ? (tile != null && (tile.floor().shallow || !tile.floor().isLiquid))
-                                : (tile != null && (!tile.floor().isLiquid || tile.block() != Blocks.air));
+            // 2. Check surrounding neighborhood for land or shallow water boundaries
+            boolean connectsToBoundary = hasNearbyBoundary(x, y, deepRadius, radiusSq, navalMode);
 
-                            if (breakCondition) return;
-                        }
-                    }
-                }
-                
-                if (navalMode) {
-                    floor = (floor == Blocks.water) ? (Floor) Blocks.deepwater : (Floor) CaeBlocks.bluonixiteWater;
-                } else {
-                    floor = (floor == Blocks.darksandWater) ? (Floor) CaeBlocks.bluonixiteWater : (Floor) Blocks.water;
-                }
+            // 3. Upgrade water depth if far enough away from land/shallow borders
+            if (!connectsToBoundary) {
+                floor = getUpgradedWaterFloor(floor, navalMode);
             }
         });
+    }
+
+    /**
+     * Determines whether a tile is a candidate for water smoothing/deepening.
+     */
+    private boolean shouldProcessWater(Floor floor, boolean navalMode) {
+        if (!floor.isLiquid) return false;
+
+        if (navalMode) {
+            // Mid-depth liquid (not shallow, not already deep)
+            return !floor.isDeep() && !floor.shallow;
+        } else {
+            // Shallow shoreline liquid
+            return floor.shallow;
+        }
+    }
+
+    /**
+     * Checks if any tile within deepRadius violates the depth condition.
+     */
+    private boolean hasNearbyBoundary(int x, int y, int radius, int radiusSq, boolean navalMode) {
+        for (int cx = -radius; cx <= radius; cx++) {
+            for (int cy = -radius; cy <= radius; cy++) {
+                // Circle distance check
+                if (cx * cx + cy * cy > radiusSq) continue;
+
+                Tile tile = gen.getTiles().get(x + cx, y + cy);
+                if (tile == null) continue;
+
+                Floor tileFloor = tile.floor();
+
+                if (navalMode) {
+                    // Border if touches shallow water or solid land
+                    if (tileFloor.shallow || !tileFloor.isLiquid) return true;
+                } else {
+                    // Border if touches dry land or solid block structures
+                    if (!tileFloor.isLiquid || tile.block() != Blocks.air) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Maps existing shallow/mid water floors to their upgraded deeper counterparts.
+     * Modify or add custom floor conversions here easily!
+     */
+    private Floor getUpgradedWaterFloor(Block currentFloor, boolean navalMode) {
+        if (navalMode) {
+            // Upgrade to deep water variants
+            if (currentFloor == CaeBlocks.aquafluent) return (Floor) CaeBlocks.deepAquafluent;
+            
+            return (Floor) CaeBlocks.bluonixiteWater; // Default deep ocean floor
+        } else {
+            // Upgrade shallow water to standard liquid floors
+            if (currentFloor == Blocks.darksandWater) return (Floor) CaeBlocks.bluonixiteWater;
+            
+            return (Floor) CaeBlocks.aquafluent; // Default standard water floor
+        }
     }
 
     public void generateOres(Seq<Block> basicOres) {

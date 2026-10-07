@@ -1,11 +1,8 @@
 package caeruleum.maps.utils.managers;
 
-import static mindustry.Vars.loadLocales;
-
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
-import arc.util.Structs;
 import caeruleum.maps.utils.CaeBasicGenerator;
 import caeruleum.maps.utils.CaeChunk;
 import caeruleum.maps.utils.CaeMapUtilities;
@@ -63,8 +60,9 @@ public class RoomHandler {
                 c.biome == CaeChunk.Biome.FOREST || 
                 c.biome == CaeChunk.Biome.PLAINS
             );
+            
+            Rand rand = gen.getRand();
 
-            // 1. Fix integer division by casting to float
             float totalChunks = (float) (chunkHandler.chunks.length * chunkHandler.chunks[0].length);
             if (totalChunks == 0) return;
 
@@ -74,46 +72,42 @@ public class RoomHandler {
             int targetLandRooms = Math.round(amount * landRatio);
             int targetOceanRooms = Math.round(amount * waterRatio);
 
-            // Padding between room edges (in tiles) so walls/shores don't merge awkwardly
             int padding = 6; 
 
-            // 2. Generate Land (Subtractive) Rooms
-            shuffleSeq(landChunks, gen.getRand());
+            // 1. Shuffle chunks ONCE using seeded shuffle
+            shuffleSeq(landChunks, rand);
+            shuffleSeq(oceanChunks, rand);
+
+            // 2. Iterate sequentially through shuffled land chunks
             for (CaeChunk c : landChunks) {
                 if (roomseq.size >= targetLandRooms) break;
 
-                int radius = gen.getRand().random(12, 22);
+                int radius = rand.random(12, 22);
                 int midX = c.getMidX();
                 int midY = c.getMidY();
 
-                // Validate distance against already spawned rooms
                 if (isPositionValid(midX, midY, radius, padding)) {
                     CaeRoom room = new CaeRoom(midX, midY, radius, gen, utils);
-                    gen.erase(room.x, room.y, room.radius); // Subtractive carve
+                    gen.erase(room.x, room.y, room.radius);
                     roomseq.add(room);
                 }
             }
 
-            // 3. Generate Ocean (Additive) Rooms
-            shuffleSeq(oceanChunks, gen.getRand());
+            // 3. Iterate sequentially through shuffled ocean chunks
             for (CaeChunk c : oceanChunks) {
                 if (roomseq.size >= targetLandRooms + targetOceanRooms) break;
 
-                int radius = gen.getRand().random(10, 18);
+                int radius = rand.random(10, 18);
                 int midX = c.getMidX();
                 int midY = c.getMidY();
 
                 if (isPositionValid(midX, midY, radius, padding)) {
-                    CaeRoom room = new CaeRoom(midX, midY, radius, gen, utils);
-                    // renderOceanRoom(room, c); // Additive stamp
+                    CaeRoom room = new CaeRoom(midX, midY, (int) Math.round(radius * 1.4), gen, utils);
                     roomseq.add(room);
                 }
             }
         }
 
-        /**
-         * Checks if a proposed room circle overlaps with any already placed room in roomseq.
-         */
         private boolean isPositionValid(int x, int y, int radius, int padding) {
             for (CaeRoom existing : roomseq) {
                 // Distance check between centers: distSq < (r1 + r2 + padding)^2

@@ -49,7 +49,6 @@ public class CaeChunkHandler {
                 chunk.biome = sampleChunkBiome(gen.getTiles(), chunk);
                 
                 chunks[x][y] = chunk;
-                Log.info("[CaeChunkHandler] Initialized chunk at (@, @) with biome: @", startX, startY, chunk.biome);
             }
         }
 
@@ -149,42 +148,42 @@ private CaeChunk.Biome sampleChunkBiome(Tiles tiles, CaeChunk chunk) {
 }
 
     public void updateOceanInfluence() {
-    int cols = chunks.length;
-    int rows = chunks[0].length;
+        int cols = chunks.length;
+        int rows = chunks[0].length;
 
-    for (int x = 0; x < cols; x++) {
-        for (int y = 0; y < rows; y++) {
-            if (chunks[x][y].biome == CaeChunk.Biome.OCEAN) {
-                chunks[x][y].oceanInfluence = 1f;
-                continue;
-            }
+        for (int x = 0; x < cols; x++) {
+            for (int y = 0; y < rows; y++) {
+                if (chunks[x][y].biome == CaeChunk.Biome.OCEAN) {
+                    chunks[x][y].oceanInfluence = 1f;
+                    continue;
+                }
 
-            int oceanNeighbors = 0;
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
-                    int nx = x + dx;
-                    int ny = y + dy;
-                    if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-                        if (chunks[nx][ny].biome == CaeChunk.Biome.OCEAN) oceanNeighbors++;
+                int oceanNeighbors = 0;
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+                            if (chunks[nx][ny].biome == CaeChunk.Biome.OCEAN) oceanNeighbors++;
+                        }
                     }
                 }
+                // 8 neighbors -> 0.0 to 1.0 influence
+                chunks[x][y].oceanInfluence = oceanNeighbors / 8f; 
             }
-            // 8 neighbors -> 0.0 to 1.0 influence
-            chunks[x][y].oceanInfluence = oceanNeighbors / 8f; 
         }
     }
-}
 
     public boolean has(CaeChunk.Biome biome) {
-    for (int x = 0; x < chunks.length; x++) {
-        for (int y = 0; y < chunks[0].length; y++) {
-            if (chunks[x][y] != null && chunks[x][y].biome == biome) {
-                return true; // Return early as soon as one match is found
+        for (int x = 0; x < chunks.length; x++) {
+            for (int y = 0; y < chunks[0].length; y++) {
+                if (chunks[x][y] != null && chunks[x][y].biome == biome) {
+                    return true; // Return early as soon as one match is found
+                }
             }
         }
+        return false;
     }
-    return false;
-}
 
     public Seq<CaeChunk> getChunks(Boolf<CaeChunk> predicate) {
         Seq<CaeChunk> result = new Seq<>();

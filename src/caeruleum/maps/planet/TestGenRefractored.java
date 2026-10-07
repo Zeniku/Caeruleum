@@ -139,7 +139,7 @@ public class TestGenRefractored extends CaeBasicGenerator {
         
 
         if (tarNoise > 0.5f && tarBlocks.contains(res)) {
-            return Blocks.shale;
+            return CaeBlocks.lazurigrass;
         }
 
         //float falloff = 1f;
@@ -165,13 +165,21 @@ public class TestGenRefractored extends CaeBasicGenerator {
 
     @Override
     protected void generate() {
+        
+        // I HATE the rand not being different everytime  
+        if (sector != null) {
+            rand.setSeed(sector.id);
+        } else {
+            rand.setSeed(seed);
+        }
         // 1. Setup Rooms & Layout
         cells(4);
         distort(10f, 12f);
 
         chunkHandler.initChunks(width, height, 32);
         roomHandler.init();
-        
+
+        Log.info("Checkpoint 1 (Start): " + rand.nextInt());
         roomHandler.makeRooms(rand.random(5, 7), chunkHandler);
         roomHandler.makeSpawn();
 
@@ -207,17 +215,19 @@ public class TestGenRefractored extends CaeBasicGenerator {
         }
 
         roomHandler.connectEnemies(roomHandler.spawn);
+
+        Log.info("Checkpoint 2 (After Rooms): " + rand.nextInt());
         roomHandler.makeConnections();
 
         // connect to the rooms
         roomHandler.connectRooms(roomHandler.spawn);
+
         for (CaeRoom room : roomHandler.roomseq) {
-            if(roomHandler.ocean && (float) rand.random(0, 1) > 0.5f) roomHandler.spawn.connectIslandsWater(room);
+            if(roomHandler.ocean && rand.chance(0.5)) roomHandler.spawn.connectIslandsWater(room);
         }
 
         CaeRoom fspawn = roomHandler.spawn;
 
-        
         distort(10f, 6f);
 
         // 4. Processing & Liquids
@@ -242,10 +252,13 @@ public class TestGenRefractored extends CaeBasicGenerator {
         inverseFloodFill(tiles.getn(roomHandler.spawn.x, roomHandler.spawn.y));
         tech();
 
+        Log.info("Checkpoint 3 (After Paths): " + rand.nextInt());
         if(chunkHandler.has(CaeChunk.Biome.FOREST)){
-            forestManager.generateHybridForest(chunkHandler, 3);
             mapUtils.generateRivers(roomHandler.spawn);
+            forestManager.generateHybridForest(chunkHandler);
         }
+        
+        Log.info("Checkpoint 4 (End): " + rand.nextInt());
         if(roomHandler.cave){
             mapUtils.generateCaveDecorations(roomHandler.roomseq, dec, genLakes);
         }

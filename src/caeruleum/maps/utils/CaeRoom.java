@@ -1,7 +1,6 @@
 package caeruleum.maps.utils;
 import mindustry.ai.Astar;
 import mindustry.content.Blocks;
-import mindustry.maps.generators.PlanetGenerator;
 import mindustry.world.Tile;
 import mindustry.world.Tiles;
 import mindustry.world.blocks.environment.Floor;
@@ -9,7 +8,7 @@ import arc.math.Angles;
 import arc.math.Mathf;
 import arc.math.Rand;
 import arc.math.geom.Vec2;
-import arc.struct.ObjectSet;
+import arc.struct.OrderedSet;
 import caeruleum.content.CaeBlocks;
 
 public class CaeRoom {
@@ -19,7 +18,7 @@ public class CaeRoom {
         private CaeBasicGenerator gen;
         public boolean pathLogged = false;
         public boolean connectLogged = false;
-        public ObjectSet<CaeRoom> connected = new ObjectSet<>();
+        public OrderedSet<CaeRoom> connected = new OrderedSet<CaeRoom>();
         private CaeMapUtilities utils;
 
         public CaeRoom(int x, int y, int radius, CaeBasicGenerator gen, CaeMapUtilities utils) {
@@ -62,7 +61,7 @@ public class CaeRoom {
         void join(int x1, int y1, int x2, int y2) {
             Rand rand = gen.getRand();
             float nscl = rand.random(100f, 140f) * 6f;
-            int stroke = rand.random(3, 9);
+            int stroke = rand.random(5, 15);
 
             int mapW = gen.getMapWidth();
             int mapH = gen.getMapHeight();
