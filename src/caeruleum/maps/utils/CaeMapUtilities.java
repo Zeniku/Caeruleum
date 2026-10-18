@@ -204,7 +204,7 @@ public class CaeMapUtilities {
         return waterTiles;
     }
 
-    protected boolean checkNavalStatus() {
+    public boolean checkNavalStatus() {
         Tiles tiles = gen.getTiles();
         int tlen = tiles.width * tiles.height;
         int waters = 0;

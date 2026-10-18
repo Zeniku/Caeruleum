@@ -14,6 +14,7 @@ import caeruleum.maps.utils.CaeChunk;
 import caeruleum.maps.utils.managers.CaeChunkHandler;
 import caeruleum.maps.utils.managers.RoomHandler;
 import caeruleum.maps.utils.managers.ForestManager;
+import caeruleum.utils.math.CaeMath;
 import caeruleum.utils.noise.CaeNoise;
 import mindustry.content.*;
 import mindustry.game.*;
@@ -28,9 +29,10 @@ public class TestGenRefractored extends CaeBasicGenerator {
     public float oceanFloorDepth = 1.3f, oceanFloorSmoothing = 1.3f, oceanDepthMultiplier = 0.5f;
     public boolean altPathing = false; // Renamed from static 'alt' for thread/save safety
     public int seed = 0;
+    private Vec3 tempVec3 = new Vec3();
     
     // Terrain Settings
-    private final float noiseScale = 5f;
+    private final float noiseScale = 1f;
     private final float waterOffset = 0.3f;
     private final boolean genLakes = false;
 
@@ -47,15 +49,17 @@ public class TestGenRefractored extends CaeBasicGenerator {
     private ForestManager forestManager = new ForestManager(this, mapUtils);
     
     // Blocks
-    private final Block[] terrain = {
-        // Ocean
-        CaeBlocks.deepAquafluent, CaeBlocks.aquafluent,
-        // Shoreline
-        CaeBlocks.bluonixiteWater, CaeBlocks.bluonixite, Blocks.darksand,
-        // Middle
-        CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass, CaeBlocks.lazurigrass,
+    private final Block[][] terrain = {
+        // Deep Ocean
+        {CaeBlocks.deepAquafluent},
+        // Shallow Ocean
+        {CaeBlocks.deepAquafluent, CaeBlocks.deepAquafluent, CaeBlocks.aquafluent},
+        // Shore
+        {CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater},
+        {CaeBlocks.bluonixite, CaeBlocks.lazurigrass},
+        {CaeBlocks.lazurigrass, Blocks.iceSnow},
         // Peaks
-        Blocks.iceSnow, Blocks.iceSnow, Blocks.snow, Blocks.snow, Blocks.ice, Blocks.ice
+        {Blocks.iceSnow, Blocks.snow, Blocks.ice}
     };
 
     private final Block[] craterTerrain = {
@@ -73,7 +77,7 @@ public class TestGenRefractored extends CaeBasicGenerator {
     private final Seq<Block> basicOres = Seq.with(Blocks.oreCopper, Blocks.oreLead);
 
     // --- Noise & Height Logic ---
-@Override 
+    @Override 
     public boolean withinCrater(Vec3 position, float buffer) {
         return position.within(crater, craterRadius + buffer);
     }
@@ -82,12 +86,12 @@ public class TestGenRefractored extends CaeBasicGenerator {
     public float rawHeight(Vec3 position) {
         // Use Tmp.v33 to avoid allocation, apply scale
         Vec3 pos = Tmp.v33.set(position).scl(noiseScale);
-        
-        float noiseVal = CaeNoise.noise3d(seed, 5, 0.4f, 1f / 2.5f, pos);
-        float mountainMask = Mathf.clamp(1f - (Mathf.pow(noiseVal - 0.16f, 2f) * 1.1f));
-        float mountainShape = CaeNoise.ridgeNoise3d(seed, 2, 1.3f, 4f, 0f, 1.2f, 1f / 3.2f, pos);
-        
-        float res = (mountainShape * mountainMask);
+
+        // cant be bothered to change it any longer
+        float continentalShape = CaeNoise.noise3d(seed, 5, 0.4f, 0.5f, pos);
+        float mountainShape = CaeNoise.ridgeNoise3d(seed, 3, 0.4f, 4f, 0f, 1.5f, 0.5f, pos);
+        float mountainMask = Mathf.clamp(CaeMath.smoothMax(0, continentalShape * continentalShape, 0.5f) * 4);
+        float finalHeight = ((mountainMask * mountainShape) + continentalShape) / 2f;
 
         // Crater logic
         float dist = position.dst(crater);
@@ -95,15 +99,15 @@ public class TestGenRefractored extends CaeBasicGenerator {
             float n = CaeNoise.noise3d(0, 8.4d, 0.4d, 0.27d, position) * (craterRadius / 4f);
             float x = Interp.pow2Out.apply(1f - (dist / craterRadius));
             float craterShape = craterDepth * x + (1f - x) * n;
-            return res - craterShape;
+            return finalHeight - craterShape;
         }
 
-        return res;
+        return finalHeight;
     }
 
     @Override
     public float getHeight(Vec3 position) {
-        return rawHeight(position);
+        return rawHeight(position) - 0.5f;//CaeMath.smoothMax(0, rawHeight(position), 0.5f);
     }
 
     @Override
@@ -128,10 +132,14 @@ public class TestGenRefractored extends CaeBasicGenerator {
 
         // Standard Terrain
         Vec3 pos = Tmp.v33.set(position).scl(noiseScale); // reuse Tmp.v33 safely as rawHeight is done
-        height = Mathf.clamp(height * 1.2f);
         
-        // Tar Logic
-        Block res = terrain[Mathf.clamp((int) (height * terrain.length), 0, terrain.length - 1)];
+        // Height Logic
+        Block[][] localTerrain = terrain;
+        float scaledHeight = (height) * localTerrain.length;
+        int index = Mathf.clamp((int) (scaledHeight), 0, localTerrain.length - 1);
+        int subIndex = Mathf.clamp((int) ((scaledHeight - index) * localTerrain[index].length), 0, localTerrain[index].length - 1);
+        Block res = localTerrain[index][subIndex];
+
 
         if(visualOnly) return res;
         float tarNoise = Simplex.noise3d(seed, 4, 0.55f, 1f / 2f, pos.x, pos.y + 999f, pos.z) * 0.3f 
@@ -179,44 +187,27 @@ public class TestGenRefractored extends CaeBasicGenerator {
         chunkHandler.initChunks(width, height, 32);
         roomHandler.init();
 
-        Log.info("Checkpoint 1 (Start): " + rand.nextInt());
         roomHandler.makeRooms(rand.random(5, 7), chunkHandler);
         roomHandler.makeSpawn();
 
         cells(1);
 
-        int tlen = tiles.width * tiles.height;
-        int total = 0, waters = 0, grass = 0, rocks = 0;
 
-        for (int i = 0; i < tlen; i++) {
-            Tile tile = tiles.geti(i);
-            if (tile.block() == Blocks.air) {
-                total++;
-                if (tile.floor().liquidDrop == Liquids.water) {
-                    waters++;
-                }
-                if(tile.floor() == (Floor) CaeBlocks.lazurigrass){
-                    grass++;
-                }
-                if(tile.floor() == (Floor) CaeBlocks.bluonixite){
-                    rocks++;
-                }
-            }
-        }
-
-        roomHandler.naval = (float) waters / total >= 0.19f;
-
+        int oceanChunksCount = chunkHandler.getChunks(c -> c.biome == CaeChunk.Biome.OCEAN).size;
+        int landChunksCount = chunkHandler.getChunks(c -> (c.biome == CaeChunk.Biome.PLAINS || c.biome == CaeChunk.Biome.MOUNTAIN || c.biome == CaeChunk.Biome.FOREST)).size;
+        if (landChunksCount == 0) landChunksCount = 1; // Avoid division by zero
+        if (oceanChunksCount == 0) oceanChunksCount = 1; // Avoid division by zero
+        roomHandler.naval = ((float)(oceanChunksCount / landChunksCount) >= 0.19f);
         roomHandler.ocean = chunkHandler.has(CaeChunk.Biome.OCEAN);
+        roomHandler.cave = chunkHandler.has(CaeChunk.Biome.MOUNTAIN); 
+        
 
-        roomHandler.cave = (float) rocks / total >= 0.19f; 
-        //render rooms
         for(CaeRoom room : roomHandler.roomseq){
           roomHandler.renderRoom(room, chunkHandler);
         }
 
         roomHandler.connectEnemies(roomHandler.spawn);
 
-        Log.info("Checkpoint 2 (After Rooms): " + rand.nextInt());
         roomHandler.makeConnections();
 
         // connect to the rooms
@@ -225,8 +216,6 @@ public class TestGenRefractored extends CaeBasicGenerator {
         for (CaeRoom room : roomHandler.roomseq) {
             if(roomHandler.ocean && rand.chance(0.5)) roomHandler.spawn.connectIslandsWater(room);
         }
-
-        CaeRoom fspawn = roomHandler.spawn;
 
         distort(10f, 6f);
 
@@ -252,13 +241,11 @@ public class TestGenRefractored extends CaeBasicGenerator {
         inverseFloodFill(tiles.getn(roomHandler.spawn.x, roomHandler.spawn.y));
         tech();
 
-        Log.info("Checkpoint 3 (After Paths): " + rand.nextInt());
         if(chunkHandler.has(CaeChunk.Biome.FOREST)){
             mapUtils.generateRivers(roomHandler.spawn);
             forestManager.generateHybridForest(chunkHandler);
         }
         
-        Log.info("Checkpoint 4 (End): " + rand.nextInt());
         if(roomHandler.cave){
             mapUtils.generateCaveDecorations(roomHandler.roomseq, dec, genLakes);
         }

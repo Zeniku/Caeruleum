@@ -82,12 +82,13 @@ public class RoomHandler {
             for (CaeChunk c : landChunks) {
                 if (roomseq.size >= targetLandRooms) break;
 
-                int radius = rand.random(12, 22);
+                int radius = rand.random(17, 22);
                 int midX = c.getMidX();
                 int midY = c.getMidY();
 
                 if (isPositionValid(midX, midY, radius, padding)) {
                     CaeRoom room = new CaeRoom(midX, midY, radius, gen, utils);
+                    c.room = room;
                     gen.erase(room.x, room.y, room.radius);
                     roomseq.add(room);
                 }
@@ -97,12 +98,13 @@ public class RoomHandler {
             for (CaeChunk c : oceanChunks) {
                 if (roomseq.size >= targetLandRooms + targetOceanRooms) break;
 
-                int radius = rand.random(10, 18);
+                int radius = rand.random(17, 25);
                 int midX = c.getMidX();
                 int midY = c.getMidY();
 
                 if (isPositionValid(midX, midY, radius, padding)) {
-                    CaeRoom room = new CaeRoom(midX, midY, (int) Math.round(radius * 1.4), gen, utils);
+                    CaeRoom room = new CaeRoom(midX, midY, radius, gen, utils);
+                    c.room = room;
                     roomseq.add(room);
                 }
             }
@@ -120,6 +122,18 @@ public class RoomHandler {
         }
 
         public void makeConnections(){
+
+            Rand rand = gen.getRand();
+            connections = rand.random(Math.max(rooms - 1, 1), rooms + 3);
+            for (int i = 0; i < connections; i++) {
+                CaeRoom room1 = randomRoom();
+                CaeRoom room2 = randomRoom(); 
+
+                room1.connect(room2, false); 
+                room1.connectIslandsWater(room2);
+            }
+        }
+        public void makeConnections(CaeChunkHandler chunkHandler){
 
             Rand rand = gen.getRand();
             connections = rand.random(Math.max(rooms - 1, 1), rooms + 3);
