@@ -1,7 +1,6 @@
 package caeruleum.content;
 
 import arc.graphics.Color;
-import caeruleum.maps.planet.CaeruleumPlanetGenerator;
 import caeruleum.maps.planet.*;
 import mindustry.content.Planets;
 import mindustry.game.Team;
@@ -47,6 +46,11 @@ public class CaePlanets {
     die = new Planet("die", caeruleumPlanet, 1f, 2){{
         generator = new TestGenRefractored();
         meshLoader = () -> new HexMesh(this, 6);
+        cloudMeshLoader = () -> new MultiMesh(
+                    new HexSkyMesh(this, 15, 0.25f, 0.13f, 5, new Color().set(Color.valueOf("363f9a")).mul(0.9f).a(0.75f), 2, 0.45f, 0.9f, 0.38f),
+                    new HexSkyMesh(this, 8, 0.6f, 0.16f, 5, Color.white.cpy().lerp(Color.valueOf("363f9a"), 0.55f).a(0.75f), 2, 0.45f, 1f, 0.41f),
+                    new HexSkyMesh(this, 3, 0.5f, 0.145f, 5, Color.white.cpy().lerp(Color.valueOf("363f9a"), 0.55f).a(0.75f), 2, 0.45f, 1f, 0.41f)
+            );
             launchCapacityMultiplier = 0.5f;
             sectorSeed = 2;
             allowWaves = true;
@@ -64,7 +68,7 @@ public class CaePlanets {
             atmosphereColor = CaeBlocks.deepAquafluent.mapColor;
             atmosphereRadIn = 0.07f;
             atmosphereRadOut = 0.25f;
-            startSector = 15;
+            startSector = 0;
             alwaysUnlocked = true;
             landCloudColor = Color.valueOf("363f9a").cpy().a(0.5f);
     }};

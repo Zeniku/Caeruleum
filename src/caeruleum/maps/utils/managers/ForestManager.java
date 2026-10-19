@@ -56,7 +56,7 @@ public class ForestManager{
         }
 
         // 3. Fast Distance Transform (BFS)
-        int maxFadeDistance = 10; // How many blocks outward the forest extends from walls
+        int maxFadeDistance = 5; // How many blocks outward the forest extends from walls
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
 
@@ -100,12 +100,12 @@ public class ForestManager{
                         ? (1f - ((float) distanceToWall / maxFadeDistance)) 
                         : 0f;
 
-                    Vec3 projectedPos = gen.getSector().rect.project(x, y);
+                    Vec3 projectedPos = gen.getSector().rect.project((float) x / width, (float) y / height);
                     // Large-scale Simplex noise for middle-of-nowhere forest groves (large scale = 60f to 80f)
-                    float groveNoise = (Simplex.noise3d(gen.getSector().id, 2, 0.5f, 70f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
+                    float groveNoise = (Simplex.noise3d(gen.getSector().id, 3, 0.2f, 75f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
 
-                    // Threshold the grove noise so only the highest peaks (>0.65) form standalone groves in open space
-                    float groveDensity = (groveNoise > 0.65f) ? ((groveNoise - 0.65f) / 0.35f) : 0f;
+                    // Threshold the grove noise so only the highest peaks (>0.75) form standalone groves in open space
+                    float groveDensity = (groveNoise > 0.85f) ? ((groveNoise - 0.85f) / 0.15f) : 0f;
 
                     // Combine both: A tile gets high density if it's NEAR A WALL OR inside an OPEN GROVE
                     float combinedDensity = Math.max(wallDensity, groveDensity);
@@ -114,7 +114,7 @@ public class ForestManager{
                     if (combinedDensity <= 0.05f) continue;
 
                     // Local detail noise (20f scale) for natural edges and breaks
-                    float detailNoise = (Simplex.noise3d(gen.getSector().id + 10, 3, 0.5f, 20f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
+                    float detailNoise = (Simplex.noise3d(gen.getSector().id + 10, 3, 0.5f, 70f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
 
                     float threshold = 1f - combinedDensity;
 

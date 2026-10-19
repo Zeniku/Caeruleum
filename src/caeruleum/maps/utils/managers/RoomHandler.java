@@ -64,7 +64,7 @@ public class RoomHandler {
             Rand rand = gen.getRand();
 
             float totalChunks = (float) (chunkHandler.chunks.length * chunkHandler.chunks[0].length);
-            if (totalChunks == 0) return;
+            if (totalChunks == 0) return; // Avoid division by zero if there are no chunks
 
             float landRatio = landChunks.size / totalChunks;
             float waterRatio = oceanChunks.size / totalChunks;

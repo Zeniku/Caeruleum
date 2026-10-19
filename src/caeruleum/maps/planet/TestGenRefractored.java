@@ -85,14 +85,13 @@ public class TestGenRefractored extends CaeBasicGenerator {
     @Override 
     public float rawHeight(Vec3 position) {
         // Use Tmp.v33 to avoid allocation, apply scale
-        Vec3 pos = Tmp.v33.set(position).scl(noiseScale);
+        Vec3 pos = Tmp.v33.set(position).add(0,10f,0).scl(noiseScale);
 
         // cant be bothered to change it any longer
-        float continentalShape = CaeNoise.noise3d(seed, 5, 0.4f, 0.5f, pos);
+        float continentalShape = CaeNoise.noise3d(seed, 4, 0.4f, 0.8f, pos);
         float mountainShape = CaeNoise.ridgeNoise3d(seed, 3, 0.4f, 4f, 0f, 1.5f, 0.5f, pos);
         float mountainMask = Mathf.clamp(CaeMath.smoothMax(0, continentalShape * continentalShape, 0.5f) * 4);
         float finalHeight = ((mountainMask * mountainShape) + continentalShape) / 2f;
-
         // Crater logic
         float dist = position.dst(crater);
         if (dist < craterRadius) {
@@ -107,7 +106,12 @@ public class TestGenRefractored extends CaeBasicGenerator {
 
     @Override
     public float getHeight(Vec3 position) {
-        return rawHeight(position) - 0.5f;//CaeMath.smoothMax(0, rawHeight(position), 0.5f);
+        float height = rawHeight(position);//CaeMath.smoothMax(0, rawHeight(position), 0.5f);
+        if (withinCrater(position, 0f)) {
+           return height - 0.5f; // Crater depth adjustment
+        }
+        return CaeMath.smoothMax(0, height - 0.5f, 0.5f);
+        //why subtract 0.5? because the height on the planet intersect the sector selected, so we need to lower the height to make it more realistic
     }
 
     @Override

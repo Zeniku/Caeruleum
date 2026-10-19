@@ -84,6 +84,7 @@ public class Tesla extends Block{
 		@Override
 		public void draw(){
 			super.draw();
+      if(efficiency < 0) return;
         Draw.z(Layer.bullet + 0.01f);
         Draw.color(lightningColor);
         Fill.circle(x, y, 2f * 1.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f));
