@@ -3,34 +3,38 @@ package caeruleum.graphics;
 import arc.graphics.Color;
 import arc.graphics.gl.Shader;
 import arc.math.geom.Vec3;
+import arc.util.Time;
 import mindustry.Vars;
 import mindustry.type.Planet;
 
 import static mindustry.Vars.*;
 // TODO wip
 public class CaeShaders {
- public static TransparencyPlanetShader Tplanet = new TransparencyPlanetShader();
+ public static CaePlanetShader Tplanet;
 
+ public static void load(){
+     Tplanet = new CaePlanetShader();
+ }
   //literally mindus copy
-  public static class TransparencyPlanetShader extends CaeLoadShader{
+  public static class CaePlanetShader extends CaeLoadShader{
       public Vec3 lightDir = new Vec3(1, 1, 1).nor();
       public Color ambientColor = Color.white.cpy();
       public Vec3 camDir = new Vec3();
       public Vec3 camPos = new Vec3();
       public Planet planet;
       public float alpha = 1f;
-      public TransparencyPlanetShader(){
+      public CaePlanetShader(){
           super("caeplanet", "caeplanet");
       }
       @Override
       public void apply(){
         camDir.set(renderer.planets.cam.direction).rotate(Vec3.Y, planet.getRotation());
-
         setUniformf("u_lightdir", lightDir);
         setUniformf("u_ambientColor", ambientColor.r, ambientColor.g, ambientColor.b);
         setUniformf("u_camdir", camDir);
         setUniformf("u_campos", renderer.planets.cam.position);
-        setUniformf("u_alpha", alpha);
+        setUniformf("u_time", Time.globalTime / 10f);
+        setUniformf("u_triplanar", 1f);
       }
   };
     public static class CaeLoadShader extends Shader {

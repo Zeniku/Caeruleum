@@ -1,6 +1,9 @@
 package caeruleum.graphics.g3d;
 
 import arc.graphics.Gl;
+import arc.graphics.Texture;
+import arc.graphics.g2d.TextureRegion;
+import arc.graphics.gl.Shader;
 import arc.math.geom.Mat3D;
 import arc.math.geom.Vec3;
 import caeruleum.graphics.CaeShaders;
@@ -13,6 +16,7 @@ public class CaeHexMesh extends HexMesh {
     public boolean ren = true;
     public boolean depth = false;
     public HexData data;
+    public TextureRegion texture;
     public CaeHexMesh(Planet planet, int divisions){
         super(planet, planet.generator, divisions, Shaders.planet);
     };
@@ -22,7 +26,9 @@ public class CaeHexMesh extends HexMesh {
         this.planet = data.planet; 
         this.shader = data.shader;
         this.mesh = data.buildHex();
+        this.texture = data.texture;
     };
+    
     @Override
     public void render(PlanetParams params, Mat3D projection, Mat3D transform){
         if (this.depth) Gl.depthMask(false);
@@ -30,6 +36,11 @@ public class CaeHexMesh extends HexMesh {
         shader.bind();
         shader.setUniformMatrix4("u_proj", projection.val);
         shader.setUniformMatrix4("u_trans", transform.val);
+
+        TextureRegion map = this.texture;
+        map.texture.bind(0);
+        shader.setUniformi("u_texture", 0);
+        shader.setUniformf("u_textureRegion", map.u, map.v, map.u2, map.v2);
         shader.apply();
         mesh.render(shader, Gl.triangles);
         if(this.depth) Gl.depthMask(true);
@@ -40,6 +51,5 @@ public class CaeHexMesh extends HexMesh {
          CaeShaders.Tplanet.planet = planet;
          CaeShaders.Tplanet.lightDir.set(planet.solarSystem.position).sub(planet.position).rotate(Vec3.Y, planet.getRotation()).nor();
          CaeShaders.Tplanet.ambientColor.set(planet.solarSystem.lightColor);
-         CaeShaders.Tplanet.alpha = params.planet == planet ? this.data.color.a : 1f;
      }; 
 }

@@ -14,6 +14,7 @@ import mindustry.ui.Fonts;
 import mindustry.ui.dialogs.*;
 import caeruleum.content.*;
 import caeruleum.gen.*;
+import caeruleum.graphics.CaeShaders;
 import caeruleum.maps.utils.CaeChunk;
 import caeruleum.maps.utils.managers.CaeChunkHandler;
 
@@ -99,6 +100,7 @@ public class CaeruleumMod extends Mod{
     public void loadContent(){
         EntityRegistry.register();
 
+        CaeShaders.load();
         CaeItems.load();
         CaeStatusEffects.load();
         CaeBullets.load();

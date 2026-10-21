@@ -1,6 +1,7 @@
 attribute vec4 a_position;
 attribute vec3 a_normal;
 attribute vec4 a_color;
+attribute vec2 a_texCoord0;
 
 uniform mat4 u_proj;
 uniform mat4 u_trans;
@@ -8,9 +9,10 @@ uniform vec3 u_lightdir;
 uniform vec3 u_camdir;
 uniform vec3 u_campos;
 uniform vec3 u_ambientColor;
-uniform float u_alpha;
 
 varying vec4 v_col;
+varying vec2 v_texCoords;
+varying vec3 v_dir;
 
 const vec3 diffuse = vec3(0.01);
 //literally mindus copy
@@ -27,6 +29,9 @@ void main(){
 
 	vec3 norc = (u_ambientColor + specular) * (diffuse + vec3(clamp((dot(a_normal, u_lightdir) + 1.0) / 2.0, 0.0, 1.0)));
 
-	v_col = vec4(a_color.rgb, 1.0) * vec4(norc, u_alpha);
+	v_col = vec4(a_color.rgb, 1.0) * vec4(norc, 0.8);
+    // Pass the mesh UV through for the fragment shader to sample textures.
+    v_dir = a_position.xyz;
+    v_texCoords = a_texCoord0;
     gl_Position = u_proj * u_trans * a_position;
 }
