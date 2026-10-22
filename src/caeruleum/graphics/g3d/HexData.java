@@ -9,11 +9,8 @@ import arc.graphics.g2d.TextureRegion;
 import arc.graphics.gl.Shader;
 import arc.math.geom.Vec3;
 import arc.util.Nullable;
-import caeruleum.content.CaePlanets;
-import caeruleum.graphics.CaeShaders.CaePlanetShader;
 import mindustry.Vars;
 import mindustry.graphics.g3d.HexMesher;
-import mindustry.graphics.g3d.MeshBuilder;
 import mindustry.type.Planet;
 import mindustry.content.Planets;
 
@@ -40,7 +37,7 @@ public class HexData{
 
             @Override
             public float getHeight(Vec3 position){
-                return -0.08f;
+                return 0.01f;
             };
         };
         this.shader = shader;

@@ -110,7 +110,10 @@ public class TestGenRefractored extends CaeBasicGenerator {
         if (withinCrater(position, 0f)) {
            return height - 0.5f; // Crater depth adjustment
         }
-        return CaeMath.smoothMax(0, height - 0.5f, 0.5f);
+        float res = height - 0.5f;
+        if(height - 0.5f <= 0f) res = 0; // smooth out the ocean to a sphere i guess
+
+        return res;
         //why subtract 0.5? because the height on the planet intersect the sector selected, so we need to lower the height to make it more realistic
     }
 
