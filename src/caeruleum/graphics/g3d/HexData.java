@@ -40,11 +40,13 @@ public class HexData{
         this.shader = shader;
     };
 
-    public HexData(Planet planet2, Shader tplanet, TextureRegion texture) {
-        this(planet2, null, tplanet, null, texture);
+    public HexData(Planet planet, Shader shader, TextureRegion texture) {
+        this(planet, null, shader, null, texture);
     }
 
     public Mesh buildHex(){
         return CaeMeshBuilder.buildHex(this.mesher, this.divisions, this.radius, this.intensity);
     };
+
+    
 }

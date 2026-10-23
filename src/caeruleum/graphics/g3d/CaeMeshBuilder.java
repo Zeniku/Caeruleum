@@ -4,6 +4,8 @@ import arc.Core;
 import arc.graphics.Color;
 import arc.graphics.Mesh;
 import arc.graphics.VertexAttribute;
+import arc.math.geom.Icosphere;
+import arc.math.geom.MeshResult;
 import arc.math.geom.Vec3;
 import arc.struct.Seq;
 import mindustry.graphics.g3d.HexMesher;
@@ -19,6 +21,31 @@ public class CaeMeshBuilder extends MeshBuilder {
       packNormals = Core.gl30 != null && (Core.app.isMobile() || Core.graphics.getGLVersion().atLeast(3, 3));
       tmpHeights = new float[14580];
     }
+    
+    public static Mesh buildIcosphere(int divisions, float radius) {
+      MeshResult result = Icosphere.create(divisions);
+      Mesh mesh = begin(result.vertices.size / 3, result.indices.size, false, false, false);
+      if (result.vertices.size >= 65535) {
+         throw new RuntimeException("Due to index size limits, only meshes with a maximum of 65535 vertices are supported. If you want more than that, make your own non-indexed mesh builder.");
+      } else {
+         float[] items = result.vertices.items;
+
+         for(int i = 0; i < result.vertices.size; ++i) {
+            items[i] *= radius;
+         }
+
+         mesh.getVerticesBuffer().put(items, 0, result.vertices.size);
+         short[] indices = new short[result.indices.size];
+
+         for(int i = 0; i < result.indices.size; ++i) {
+            indices[i] = (short)result.indices.items[i];
+         }
+
+         mesh.getIndicesBuffer().put(indices);
+         return end(mesh);
+      }
+   }
+
     public static Mesh buildPlanetGrid(PlanetGrid grid, Color color, float scale) {
       Mesh mesh = begin(grid.tiles.length * 12, 0, false, false);
       float col = color.toFloatBits();

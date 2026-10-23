@@ -15,14 +15,15 @@ import mindustry.type.Planet;
 public class CaeHexMesh extends HexMesh {
     public boolean ren = true;
     public boolean depth = false;
-    public HexData data;
+
     public TextureRegion texture;
+    public HexData data;
     public CaeHexMesh(Planet planet, int divisions){
         super(planet, planet.generator, divisions, Shaders.planet);
     };
-    
-    public CaeHexMesh(HexData data){
-        this.data = data;
+
+    public CaeHexMesh(HexData data){  
+        this.data = data;   
         this.planet = data.planet; 
         this.shader = data.shader;
         this.mesh = data.buildHex();
