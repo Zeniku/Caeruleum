@@ -107,6 +107,8 @@ public class CaeruleumMod extends Mod{
         CaeUnits.load();
         CaeBlocks.load();
         CaePlanets.load();
+
+        CaeruleumTechTree.load();
     }
 
 }

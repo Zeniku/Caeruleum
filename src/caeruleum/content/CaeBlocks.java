@@ -378,6 +378,7 @@ public class CaeBlocks {
             health = 1200;
             itemCapacity = 1500;
             unitCapModifier = 0;
+            alwaysUnlocked = true;
             requirements(Category.effect, with(CaeItems.lonsdaleite, 20, Items.copper, 30, Items.titanium, 40));
         }
         @Override

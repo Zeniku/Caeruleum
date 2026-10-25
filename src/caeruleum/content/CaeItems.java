@@ -26,6 +26,8 @@ public class CaeItems {
         lonsdaleite = new Item("lonsdaleite", Color.valueOf("473B78")){{
             hardness = 3;
             cost = 1.1f;
+            alwaysUnlocked = true;
+
         }};
     }
 }
