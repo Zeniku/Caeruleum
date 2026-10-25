@@ -41,6 +41,7 @@ public class CaeMapUtilities {
     public CaeMapUtilities(CaeBasicGenerator gen) {
         this.gen = gen;
     }
+    
     public void pass(Intc2 r){
         for (Tile tile : gen.getTiles()) {
             floor = tile.floor();

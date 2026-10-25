@@ -1,6 +1,11 @@
 package caeruleum.maps.utils;
 
+import arc.func.Intc2;
+import mindustry.world.Tile;
+import mindustry.world.Tiles;
+
 public class CaeChunk {
+    private CaeBasicGenerator gen;
     public int width;
     public int height;
     public int y;
@@ -14,11 +19,20 @@ public class CaeChunk {
 
     public Biome biome;
 
-    public CaeChunk (int x, int y, int width, int height){
+    public CaeChunk (int x, int y, int width, int height, CaeBasicGenerator gen){
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.gen = gen;
+    }
+    // just to get every coords inside the chunk
+    public void pass(Intc2 r){
+        for (int cx = x; cx < x + width; cx++) {
+            for (int cy = y; cy < y + height; cy++) {
+                r.get(cx, cy);
+            }
+        }
     }
 
     public int getMidX() {

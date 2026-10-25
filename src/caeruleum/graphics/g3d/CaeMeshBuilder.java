@@ -21,8 +21,8 @@ public class CaeMeshBuilder extends MeshBuilder {
       packNormals = Core.gl30 != null && (Core.app.isMobile() || Core.graphics.getGLVersion().atLeast(3, 3));
       tmpHeights = new float[14580];
     }
-    
-    public static Mesh buildIcosphere(int divisions, float radius) {
+
+   public static Mesh buildIcosphere(int divisions, float radius) {
       MeshResult result = Icosphere.create(divisions);
       Mesh mesh = begin(result.vertices.size / 3, result.indices.size, false, false, false);
       if (result.vertices.size >= 65535) {

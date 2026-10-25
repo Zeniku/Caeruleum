@@ -1,7 +1,10 @@
 package caeruleum.maps.utils.managers;
 
+import java.util.EnumMap;
+
 import arc.func.Boolf;
 import arc.func.Cons;
+import arc.func.Intc2;
 import arc.math.Mathf;
 import arc.math.geom.Vec3;
 import arc.struct.Seq;
@@ -21,6 +24,13 @@ public class CaeChunkHandler {
     public CaeChunk[][] chunks;
     private CaeMapUtilities utils;
     private CaeBasicGenerator gen;
+    private final EnumMap<CaeChunk.Biome, Seq<CaeChunk>> chunksByType = new EnumMap<>(CaeChunk.Biome.class);
+    // Initialize a Seq for every enum value so they are never null
+    {
+        for (CaeChunk.Biome type : CaeChunk.Biome.values()) {
+            chunksByType.put(type, new Seq<>());
+        }
+    }
 
     public CaeChunkHandler(CaeBasicGenerator gen, CaeMapUtilities utils){
         this.gen = gen;
@@ -45,8 +55,10 @@ public class CaeChunkHandler {
                 int actualChunkHeight = Math.min(chunkSize, height - startY);
 
                 
-                CaeChunk chunk = new CaeChunk(startX, startY, actualChunkWidth, actualChunkHeight);
-                chunk.biome = sampleChunkBiome(gen.getTiles(), chunk);
+                CaeChunk chunk = new CaeChunk(startX, startY, actualChunkWidth, actualChunkHeight, gen);
+                CaeChunk.Biome biome = sampleChunkBiome(gen.getTiles(), chunk);
+                chunk.biome = biome;
+                chunksByType.get(biome).add(chunk);
                 
                 chunks[x][y] = chunk;
             }
@@ -175,23 +187,21 @@ private CaeChunk.Biome sampleChunkBiome(Tiles tiles, CaeChunk chunk) {
     }
 
     public boolean has(CaeChunk.Biome biome) {
-        for (int x = 0; x < chunks.length; x++) {
-            for (int y = 0; y < chunks[0].length; y++) {
-                if (chunks[x][y] != null && chunks[x][y].biome == biome) {
-                    return true; // Return early as soon as one match is found
-                }
-            }
-        }
-        return false;
+        Seq<CaeChunk> chunks = chunksByType.get(biome);
+        return chunks != null && !chunks.isEmpty();
     }
 
-    public Seq<CaeChunk> getChunks(Boolf<CaeChunk> predicate) {
+
+    public Seq<CaeChunk> getChunks(CaeChunk.Biome biome){
+        return chunksByType.get(biome);
+    }
+
+    public Seq<CaeChunk> getChunks(CaeChunk.Biome... biomes) {
         Seq<CaeChunk> result = new Seq<>();
-        for (int x = 0; x < chunks.length; x++) {
-            for (int y = 0; y < chunks[0].length; y++) {
-                if (predicate.get(chunks[x][y])) {
-                    result.add(chunks[x][y]);
-                }
+        for (CaeChunk.Biome biome : biomes) {
+            Seq<CaeChunk> bucket = chunksByType.get(biome);
+            if (bucket != null) {
+                result.addAll(bucket);
             }
         }
         return result;

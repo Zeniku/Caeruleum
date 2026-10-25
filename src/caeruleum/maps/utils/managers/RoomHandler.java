@@ -52,20 +52,20 @@ public class RoomHandler {
                 seq.swap(i, target);
             }
         }
-        
         public void makeRooms(int amount, CaeChunkHandler chunkHandler) {
-            Seq<CaeChunk> oceanChunks = chunkHandler.getChunks(c -> c.biome == CaeChunk.Biome.OCEAN);
-            Seq<CaeChunk> landChunks = chunkHandler.getChunks(c -> 
-                c.biome == CaeChunk.Biome.MOUNTAIN || 
-                c.biome == CaeChunk.Biome.FOREST || 
-                c.biome == CaeChunk.Biome.PLAINS
+            Seq<CaeChunk> oceanChunks = chunkHandler.getChunks(CaeChunk.Biome.OCEAN);
+            Seq<CaeChunk> landChunks = chunkHandler.getChunks(
+                CaeChunk.Biome.MOUNTAIN,
+                CaeChunk.Biome.FOREST,
+                CaeChunk.Biome.PLAINS
             );
             
-            Rand rand = gen.getRand();
-
-            float totalChunks = (float) (chunkHandler.chunks.length * chunkHandler.chunks[0].length);
+            makeRooms(amount, oceanChunks, landChunks, (float) (chunkHandler.chunks.length * chunkHandler.chunks[0].length));
+        }
+        
+        public void makeRooms(int amount, Seq<CaeChunk> oceanChunks, Seq<CaeChunk> landChunks, float totalChunks) {
             if (totalChunks == 0) return; // Avoid division by zero if there are no chunks
-
+            Rand rand = gen.getRand();
             float landRatio = landChunks.size / totalChunks;
             float waterRatio = oceanChunks.size / totalChunks;
 

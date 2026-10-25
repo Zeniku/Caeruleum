@@ -193,18 +193,22 @@ public class TestGenRefractored extends CaeBasicGenerator {
 
         chunkHandler.initChunks(width, height, 32);
         roomHandler.init();
+        
 
-        roomHandler.makeRooms(rand.random(5, 7), chunkHandler);
+        Seq<CaeChunk> oceanChunks = chunkHandler.getChunks(CaeChunk.Biome.OCEAN);
+        Seq<CaeChunk> landChunks = chunkHandler.getChunks(CaeChunk.Biome.PLAINS, CaeChunk.Biome.MOUNTAIN, CaeChunk.Biome.FOREST);
+        int oceanChunksCount = oceanChunks.size;
+        int landChunksCount = landChunks.size;
+
+        roomHandler.makeRooms(rand.random(5, 7), oceanChunks, landChunks, (float) (chunkHandler.chunks.length * chunkHandler.chunks[0].length));
         roomHandler.makeSpawn();
 
         cells(1);
 
-
-        int oceanChunksCount = chunkHandler.getChunks(c -> c.biome == CaeChunk.Biome.OCEAN).size;
-        int landChunksCount = chunkHandler.getChunks(c -> (c.biome == CaeChunk.Biome.PLAINS || c.biome == CaeChunk.Biome.MOUNTAIN || c.biome == CaeChunk.Biome.FOREST)).size;
         if (landChunksCount == 0) landChunksCount = 1; // Avoid division by zero
         if (oceanChunksCount == 0) oceanChunksCount = 1; // Avoid division by zero
         roomHandler.naval = ((float)(oceanChunksCount / landChunksCount) >= 0.19f);
+
         roomHandler.ocean = chunkHandler.has(CaeChunk.Biome.OCEAN);
         roomHandler.cave = chunkHandler.has(CaeChunk.Biome.MOUNTAIN); 
         

@@ -17,12 +17,12 @@ public class CaeHexMesh extends HexMesh {
     public boolean depth = false;
 
     public TextureRegion texture;
-    public HexData data;
+    public MeshData data;
     public CaeHexMesh(Planet planet, int divisions){
         super(planet, planet.generator, divisions, Shaders.planet);
     };
 
-    public CaeHexMesh(HexData data){  
+    public CaeHexMesh(MeshData data){  
         this.data = data;   
         this.planet = data.planet; 
         this.shader = data.shader;
@@ -46,11 +46,14 @@ public class CaeHexMesh extends HexMesh {
         mesh.render(shader, Gl.triangles);
         if(this.depth) Gl.depthMask(true);
     }
+
      @Override 
      public void preRender(PlanetParams params){
          if (this.shader == Shaders.planet){ super.preRender(params); return;}
-         CaeShaders.Tplanet.planet = planet;
-         CaeShaders.Tplanet.lightDir.set(planet.solarSystem.position).sub(planet.position).rotate(Vec3.Y, planet.getRotation()).nor();
-         CaeShaders.Tplanet.ambientColor.set(planet.solarSystem.lightColor);
+         if(this.shader instanceof CaeShaders.CaePlanetShader s){
+         s.planet = planet;
+         s.lightDir.set(planet.solarSystem.position).sub(planet.position).rotate(Vec3.Y, planet.getRotation()).nor();
+         s.ambientColor.set(planet.solarSystem.lightColor);
+        }
      }; 
 }

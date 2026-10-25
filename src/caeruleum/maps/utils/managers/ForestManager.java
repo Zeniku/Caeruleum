@@ -26,7 +26,7 @@ public class ForestManager{
     }
 
     public void generateHybridForest(CaeChunkHandler handler) {
-        Seq<CaeChunk> forestChunks = handler.getChunks(c -> c.biome == CaeChunk.Biome.FOREST);
+        Seq<CaeChunk> forestChunks = handler.getChunks(CaeChunk.Biome.FOREST);
         if (forestChunks.isEmpty()) return;
 
         Tiles tiles = gen.getTiles();
@@ -43,16 +43,14 @@ public class ForestManager{
 
         // 2. Seed the walls ONLY inside the forest chunks
         for (CaeChunk chunk : forestChunks) {
-            for (int x = chunk.x; x < chunk.x + chunk.width; x++) {
-                for (int y = chunk.y; y < chunk.y + chunk.height; y++) {
-                    Tile tile = tiles.get(x, y);
+            chunk.pass((x, y) -> {
+                Tile tile = tiles.get(x, y);
                     // If it's a solid block, it's the "core" of the forest density
-                    if (tile != null && tile.solid()) {
-                        dist[x][y] = 0;
-                        queue.addLast(x + y * width); // Pack x/y into a single int for speed
-                    }
+                if (tile != null && tile.solid()) {
+                    dist[x][y] = 0;
+                    queue.addLast(x + y * width); // Pack x/y into a single int for speed
                 }
-            }
+            });
         }
 
         // 3. Fast Distance Transform (BFS)
@@ -85,54 +83,51 @@ public class ForestManager{
         Rand rand = gen.getRand();
 
         for (CaeChunk chunk : forestChunks) {
-            for (int x = chunk.x; x < chunk.x + chunk.width; x++) {
-                for (int y = chunk.y; y < chunk.y + chunk.height; y++) {
+            chunk.pass((x, y) -> {
+                Tile tile = tiles.get(x, y);
 
-                    Tile tile = tiles.get(x, y);
-
-                    if (tile == null || tile.floor() != CaeBlocks.lazurigrass || !tile.block().isAir()) {
-                        continue;
-                    }
-
-                    int distanceToWall = dist[x][y];
-                    // Convert distance to wall density: 1.0 directly against walls, 0.0 at maxFadeDistance (e.g. 14 blocks away)
-                    float wallDensity = (distanceToWall < maxFadeDistance) 
-                        ? (1f - ((float) distanceToWall / maxFadeDistance)) 
-                        : 0f;
-
-                    Vec3 projectedPos = gen.getSector().rect.project((float) x / width, (float) y / height);
-                    // Large-scale Simplex noise for middle-of-nowhere forest groves (large scale = 60f to 80f)
-                    float groveNoise = (Simplex.noise3d(gen.getSector().id, 3, 0.2f, 75f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
-
-                    // Threshold the grove noise so only the highest peaks (>0.75) form standalone groves in open space
-                    float groveDensity = (groveNoise > 0.85f) ? ((groveNoise - 0.85f) / 0.15f) : 0f;
-
-                    // Combine both: A tile gets high density if it's NEAR A WALL OR inside an OPEN GROVE
-                    float combinedDensity = Math.max(wallDensity, groveDensity);
-
-                    // Skip tiles that have no density from either source
-                    if (combinedDensity <= 0.05f) continue;
-
-                    // Local detail noise (20f scale) for natural edges and breaks
-                    float detailNoise = (Simplex.noise3d(gen.getSector().id + 10, 3, 0.5f, 70f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
-
-                    float threshold = 1f - combinedDensity;
-
-                    // Core trees (dense center of groves + dense wall hugs)
-                    if (detailNoise > threshold) {
-                        if (x % 2 == 0 && y % 2 == 0) { // Keep walkable
-                            tile.setBlock(CaeBlocks.blueTree);
-                        }
-                    } 
-                    // Scattered flora on outer boundaries
-                    else if (detailNoise > threshold - 0.25f && rand.chance(0.20f)) {
-                        float roll = rand.random(1f);
-                        if (roll < 0.3f) tile.setBlock(CaeBlocks.blueTree);
-                        else if (roll < 0.6f) tile.setBlock(CaeBlocks.blueFlower);
-                        else tile.setBlock(CaeBlocks.blueTendrils);
-                    }
+                if (tile == null || tile.floor() != CaeBlocks.lazurigrass || !tile.block().isAir()) {
+                    return; // Skips to the next coordinate (acts like continue)
                 }
-            }
+
+                int distanceToWall = dist[x][y];
+                // Convert distance to wall density: 1.0 directly against walls, 0.0 at maxFadeDistance (e.g. 14 blocks away)
+                float wallDensity = (distanceToWall < maxFadeDistance) 
+                    ? (1f - ((float) distanceToWall / maxFadeDistance)) 
+                    : 0f;
+
+                Vec3 projectedPos = gen.getSector().rect.project((float) x / width, (float) y / height);
+                // Large-scale Simplex noise for middle-of-nowhere forest groves (large scale = 60f to 80f)
+                float groveNoise = (Simplex.noise3d(gen.getSector().id, 3, 0.2f, 75f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
+
+                // Threshold the grove noise
+                float groveDensity = (groveNoise > 0.85f) ? ((groveNoise - 0.85f) / 0.15f) : 0f;
+
+                // Combine both: A tile gets high density if it's NEAR A WALL OR inside an OPEN GROVE
+                float combinedDensity = Math.max(wallDensity, groveDensity);
+
+                // Skip tiles that have no density from either source
+                if (combinedDensity <= 0.05f) return;
+
+                // Local detail noise (20f scale) for natural edges and breaks
+                float detailNoise = (Simplex.noise3d(gen.getSector().id + 10, 3, 0.5f, 70f, projectedPos.x, projectedPos.y, projectedPos.z) + 1f) / 2f;
+
+                float threshold = 1f - combinedDensity;
+
+                // Core trees (dense center of groves + dense wall hugs)
+                if (detailNoise > threshold) {
+                    if (x % 2 == 0 && y % 2 == 0) { // Keep walkable
+                        tile.setBlock(CaeBlocks.blueTree);
+                    }
+                } 
+                // Scattered flora on outer boundaries
+                else if (detailNoise > threshold - 0.25f && rand.chance(0.20f)) {
+                    float roll = rand.random(1f);
+                    if (roll < 0.3f) tile.setBlock(CaeBlocks.blueTree);
+                    else if (roll < 0.6f) tile.setBlock(CaeBlocks.blueFlower);
+                    else tile.setBlock(CaeBlocks.blueTendrils);
+                }
+            });
         }
     }
 }

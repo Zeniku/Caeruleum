@@ -5,7 +5,7 @@ import arc.graphics.Color;
 import arc.util.noise.Noise;
 import caeruleum.graphics.CaeShaders;
 import caeruleum.graphics.g3d.CaeHexMesh;
-import caeruleum.graphics.g3d.HexData;
+import caeruleum.graphics.g3d.MeshData;
 import caeruleum.maps.planet.*;
 import mindustry.content.Planets;
 import mindustry.game.Team;
@@ -22,7 +22,7 @@ public class CaePlanets {
     public static void load(){
         caeruleumPlanet = new Planet("caeruleum", Planets.sun, 1f, 2){{
             generator = new CaeruleumPlanetGenerator();
-            meshLoader = () -> new CaeHexMesh(new HexData(this, CaeShaders.Tplanet, Core.atlas.find("caeruleum-bluonixite-stone")));
+            meshLoader = () -> new CaeHexMesh(new MeshData(this, CaeShaders.Tplanet, Core.atlas.find("caeruleum-bluonixite-stone")));
             cloudMeshLoader = () -> new MultiMesh(
                     new HexSkyMesh(this, 15, 0.25f, 0.13f, 5, new Color().set(Color.valueOf("363f9a")).mul(0.9f).a(0.75f), 2, 0.45f, 0.9f, 0.38f),
                     new HexSkyMesh(this, 8, 0.6f, 0.16f, 5, Color.white.cpy().lerp(Color.valueOf("363f9a"), 0.55f).a(0.75f), 2, 0.45f, 1f, 0.41f),
@@ -81,9 +81,14 @@ public class CaePlanets {
     dient = new Planet("dient", Planets.sun, 1f, 2){{
         generator = new TestGenRefractored();
         meshLoader = () -> new MultiMesh(
-            new HexMesh(this, 6),
-            new CaeHexMesh(new HexData(this, CaeShaders.Tplanet, Core.atlas.find("caeruleum-aquafluent-water")))
+            new HexMesh(this, 5),
+            new CaeHexMesh(
+                new MeshData(this, CaeShaders.Tplanet, "caeruleum-aquafluent-water"){{
+                    divisions = 5;
+                }}
+            )
         );
+
         launchCapacityMultiplier = 0.5f;
             sectorSeed = 2;
             allowWaves = true;
