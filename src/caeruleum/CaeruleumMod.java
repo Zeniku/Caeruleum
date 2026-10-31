@@ -1,5 +1,9 @@
 package caeruleum;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 import arc.*;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
@@ -7,8 +11,11 @@ import arc.graphics.g2d.Font;
 import arc.graphics.g2d.Lines;
 import arc.util.*;
 import mindustry.Vars;
+import mindustry.game.EventType;
 import mindustry.game.EventType.*;
 import mindustry.graphics.Layer;
+import mindustry.io.SaveFileReader;
+import mindustry.io.SaveVersion;
 import mindustry.mod.*;
 import mindustry.ui.Fonts;
 import mindustry.ui.dialogs.*;
@@ -31,16 +38,38 @@ public class CaeruleumMod extends Mod{
                 dialog.cont.add("This is a wip mod \nEverything in this mod is experimental\nand constantly changing").center().row();
                 //mod sprites are prefixed with the mod name (this mod is called 'example-java-mod' in its config)
                 dialog.cont.image(Core.atlas.find("caeruleum-icon")).pad(20f).row();
-                dialog.cont.button("you suck", dialog::hide).size(100f, 50f);
+                dialog.cont.button("you dont suck :D", dialog::hide).size(100f, 50f);
                 dialog.show();
             });
         });
     }
+
     @Override 
     public void init(){
         Log.info("Loaded CaeruleumMod init.");
+        setupChunkSaving();
         setupChunkDebugRenderer();
     }
+    
+    private void setupChunkSaving(){
+        SaveVersion.addCustomChunk("caeruleum-chunks", new SaveFileReader.CustomChunk(){
+        public void write(DataOutput out) throws IOException {
+            CaeChunkHandler h = CaeChunkHandler.current;
+            out.writeByte(1); // format version
+            out.writeShort(h.mapWidth); out.writeShort(h.mapHeight); out.writeShort(h.chunkSize);
+            h.save(out);
+        }
+        public void read(DataInput in) throws IOException {
+            int version = in.readByte();
+            int w = in.readShort(), h = in.readShort(), size = in.readShort();
+            CaeChunkHandler.current = CaeChunkHandler.load(w, h, size, in);
+        }
+        public boolean shouldWrite() { return CaeChunkHandler.current != null; }
+    });
+
+    Events.on(EventType.ResetEvent.class, e -> CaeChunkHandler.current = null);
+    }
+
     private void setupChunkDebugRenderer() {
         Events.run(Trigger.draw, () -> {
             // Only draw if world is loaded and chunk handler has chunks

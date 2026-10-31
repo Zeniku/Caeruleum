@@ -61,7 +61,7 @@ public class RandSpriteBulletType extends BasicBulletType{
 		if(b.data == null){
 			int ind = frontRegions.indexOf(frontRegions.random());
 			b.data = new RandSpriteBulletData(frontRegions.get(ind), backRegions.get(ind));
-			if(Mathf.random() < critChance) ((RandSpriteBulletData)b.data).crit = true;
+			if(Mathf.chance(critChance)) ((RandSpriteBulletData)b.data).crit = true;
 			if(((RandSpriteBulletData)b.data).crit) b.damage *= critMultiplier;
 
 		}
@@ -69,6 +69,7 @@ public class RandSpriteBulletType extends BasicBulletType{
 		if(spawnFx != null || spawnFx != Fx.none){
 			spawnFx.at(b);
 		}
+		
 		super.init(b);
 	};
 

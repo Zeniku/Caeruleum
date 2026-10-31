@@ -165,7 +165,7 @@ public class RoomHandler {
 
         }
         public void renderRoom(CaeRoom room, CaeChunkHandler chunkHandler){
-            CaeChunk roomChunk = chunkHandler.getChunkAt(room.x, room.y, 32);
+            CaeChunk roomChunk = chunkHandler.getChunkAt(room.x, room.y);
             if(roomChunk.biome == CaeChunk.Biome.PLAINS || roomChunk.biome == CaeChunk.Biome.MOUNTAIN || roomChunk.biome == CaeChunk.Biome.FOREST) gen.erase(room.x, room.y, room.radius);
             if(roomChunk.biome == CaeChunk.Biome.OCEAN) utils.makeIsland(room.x, room.y, room.radius);
         }

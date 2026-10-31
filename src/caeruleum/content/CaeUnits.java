@@ -3,6 +3,7 @@ package caeruleum.content;
 import arc.graphics.*;
 import mindustry.content.*;
 import mindustry.entities.bullet.*;
+import mindustry.entities.pattern.ShootSpread;
 import mindustry.ai.types.*;
 import mindustry.gen.*;
 import mindustry.type.*;
@@ -423,6 +424,103 @@ public class CaeUnits{
 					rotate = true;
 					rotateSpeed = 60;
 					bullet = CaeBullets.standardOrbiter;
+				}}
+			);
+		}};
+		pugione = new UnitType("pugione"){{
+			speed = 0.6f;
+			hitSize = 11;
+			health = 300;
+			maxRange = 120;
+			range = 120;
+			
+			targetAir = false;
+			armor = 3;
+			aiController = GroundAI::new;
+			constructor = MechUnit::create;
+
+			weapons.add(
+				new Weapon("caeruleum-pugioneWeapon"){{
+					reload = 20;
+					x = 5;
+					y = 0;
+					top = false;
+					ejectEffect = Fx.none;
+					shootSound = Sounds.shootFuse;
+					shootY = 4.75f;
+					recoil = -4; //negative so it looks like it's punching
+					range = 80;
+					soundPitchMin = 0.42f;
+					soundPitchMax = 1.74f;
+					rotate = true;
+					rotateSpeed = 60;
+					bullet = CaeBullets.standardSpike;
+				}}
+			);
+		}};
+
+		mucro = new UnitType("mucro"){{
+			speed = 0.45f;
+			hitSize = 11.75f;
+			health = 675;
+			targetAir = false;
+			maxRange = 170;
+			range = 170;
+			
+			armor = 4;
+			aiController = GroundAI::new;
+			constructor = MechUnit::create;
+
+			weapons.add(
+				new Weapon("caeruleum-mucroWeapon"){{
+					x = 24 / 4;
+					y = 0;
+					reload = 30;
+					top = false;
+					ejectEffect = Fx.none;
+					shootSound = Sounds.shootFuse;
+					shootY = 30 / 4;
+					recoil = -4; //negative so it looks like it's punching
+					targetAir = false;
+					soundPitchMin = 0.42f;
+					soundPitchMax = 1.74f;
+					rotate = true;
+					rotateSpeed = 60f;
+					bullet = CaeBullets.mediumSpike;
+					shoot = new ShootSpread(4, 22.5f);
+					shoot.shotDelay = 5;
+				}}
+			);
+		}};
+
+		tragula = new UnitType("tragula"){{
+			speed = 0.4f;
+			hitSize = 15;
+			health = 1175;
+			targetAir = false;
+			maxRange = 180;
+			range = 180;
+			armor = 9;
+			mechFrontSway = 0.55f;
+			aiController = GroundAI::new;
+			constructor = MechUnit::create;
+
+			weapons.add(
+				new Weapon("caeruleum-tragulaWeapon"){{
+					x = 8;
+					y = 1;
+					reload = 40;
+					top = false;
+					ejectEffect = Fx.none;
+					shootSound = Sounds.shootFuse;
+					shootY = 35 / 4;
+					recoil = -4; //negative so it looks like it's punching
+					targetAir = false;
+					soundPitchMin = 0.42f;
+					soundPitchMax = 1.74f;
+					rotate = true;
+					rotateSpeed = 60;
+					bullet = CaeBullets.highSpike;
 				}}
 			);
 		}};

@@ -1,6 +1,10 @@
 package caeruleum.maps.utils.managers;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.EnumMap;
+import java.util.zip.DataFormatException;
 
 import arc.func.Boolf;
 import arc.func.Cons;
@@ -9,6 +13,7 @@ import arc.math.Mathf;
 import arc.math.geom.Vec3;
 import arc.struct.Seq;
 import arc.util.Log;
+import arc.util.Nullable;
 import caeruleum.content.CaeBlocks;
 import caeruleum.maps.utils.CaeBasicGenerator;
 import caeruleum.maps.utils.CaeChunk;
@@ -22,9 +27,10 @@ import mindustry.world.blocks.environment.Floor;
 public class CaeChunkHandler {
     public static CaeChunkHandler current;
     public CaeChunk[][] chunks;
-    private CaeMapUtilities utils;
-    private CaeBasicGenerator gen;
+    private @Nullable CaeMapUtilities utils;
+    private @Nullable CaeBasicGenerator gen;
     private final EnumMap<CaeChunk.Biome, Seq<CaeChunk>> chunksByType = new EnumMap<>(CaeChunk.Biome.class);
+    public int mapWidth, mapHeight, chunkSize;
     // Initialize a Seq for every enum value so they are never null
     {
         for (CaeChunk.Biome type : CaeChunk.Biome.values()) {
@@ -38,7 +44,12 @@ public class CaeChunkHandler {
     }
 
     public void initChunks(int width, int height, int chunkSize) {
+        if(gen == null) throw new IllegalStateException("initChunks needs a generator; this handler was loaded from a save");
         CaeChunkHandler.current = this;
+        this.chunkSize = chunkSize;
+        this.mapWidth = width;
+        this.mapHeight = height;
+        for(Seq<CaeChunk> s : chunksByType.values()) s.clear();
         // 1. Calculate grid size using ceiling division to ensure remaining space gets a chunk
         int chunkCols = (width + chunkSize - 1) / chunkSize;
         int chunkRows = (height + chunkSize - 1) / chunkSize;
@@ -74,14 +85,11 @@ public class CaeChunkHandler {
      * @param worldY Tile Y coordinate on the map.
      * @return The CaeChunk containing the tile, or null if out of map bounds.
      */
-    public CaeChunk getChunkAt(int worldX, int worldY, int chunkSize) {
+    public CaeChunk getChunkAt(int worldX, int worldY) {
         if (chunks == null || chunks.length == 0 || chunks[0].length == 0) return null;
 
-        int mapW = gen.getMapWidth();
-        int mapH = gen.getMapHeight();
-
         // 1. Boundary check against map dimensions
-        if (worldX < 0 || worldX >= mapW || worldY < 0 || worldY >= mapH) {
+        if (worldX < 0 || worldX >= mapWidth || worldY < 0 || worldY >= mapHeight) {
             return null;
         }
 
@@ -95,6 +103,39 @@ public class CaeChunkHandler {
 
         return chunks[cX][cY];
     }
+    public void setBiome(CaeChunk chunk, CaeChunk.Biome biome){
+        if(chunk.biome == biome) return;
+        chunksByType.get(chunk.biome).remove(chunk);
+        chunk.biome = biome;
+        chunksByType.get(biome).add(chunk);
+        updateOceanInfluence();
+    }
+    public void save(DataOutput out) throws IOException {
+        for(CaeChunk[] collum : chunks){
+            for(CaeChunk chunk : collum){
+                out.writeByte(chunk.biome.ordinal());
+            }
+        }
+    }
+    public static CaeChunkHandler load(int mapW, int mapH, int chunkSize, DataInput in) throws IOException {
+        CaeChunkHandler h = new CaeChunkHandler(null, null);
+        h.mapWidth = mapW; h.mapHeight = mapH; h.chunkSize = chunkSize;
+        int cols = (mapW + chunkSize - 1) / chunkSize;
+        int rows = (mapH + chunkSize - 1) / chunkSize;
+        h.chunks = new CaeChunk[cols][rows];
+        for (int x = 0; x < cols; x++) {
+            for (int y = 0; y < rows; y++) {
+                int sx = x * chunkSize, sy = y * chunkSize;
+                CaeChunk c = new CaeChunk(sx, sy,
+                    Math.min(chunkSize, mapW - sx), Math.min(chunkSize, mapH - sy), null);
+                c.biome = CaeChunk.Biome.values()[in.readByte()];
+                h.chunksByType.get(c.biome).add(c);
+                h.chunks[x][y] = c;
+            }
+        }
+        h.updateOceanInfluence();
+        return h;
+        }
     // Centralized mapping helper
 public CaeChunk.Biome getBlockBiome(Block floor) {
     if (floor == null) return CaeChunk.Biome.PLAINS;
@@ -116,6 +157,8 @@ public CaeChunk.Biome getBlockBiome(Block floor) {
 }
 
 private CaeChunk.Biome sampleChunkBiome(Tiles tiles, CaeChunk chunk) {
+    
+    if(gen == null) throw new IllegalStateException("sampleChunkBiome needs a generator; this handler was loaded from a save");
     // 1. CRATER CHECK: Check if chunk center falls within a crater region
     Vec3 midPos = gen.getSector().rect.project(chunk.getMidX(), chunk.getMidY());
     if (gen.withinCrater(midPos, 0f)) {

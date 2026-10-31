@@ -104,7 +104,7 @@ public class StatusEffectProjector extends Block{
     @Override
 		public void draw(){
 			super.draw();
-			if(efficiency < 0) return; 
+			if(this.efficiency < 0) return; 
 			  Draw.z(Layer.effect - 0.01f);
 				CaeDraw.spike(x, y, starColor, 2f * 2.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f), Time.time *  2f);
 				CaeDraw.spike(x, y, Color.white, 2f * 1.9f + Mathf.absin(Time.time, 5f, 1f) + Mathf.random(0.1f),  Time.time * 2f);

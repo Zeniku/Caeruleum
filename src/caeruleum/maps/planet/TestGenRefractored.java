@@ -20,7 +20,6 @@ import mindustry.content.*;
 import mindustry.game.*;
 import mindustry.maps.generators.*;
 import mindustry.world.*;
-import mindustry.world.blocks.environment.Floor;
 
 
 public class TestGenRefractored extends CaeBasicGenerator {
@@ -29,11 +28,9 @@ public class TestGenRefractored extends CaeBasicGenerator {
     public float oceanFloorDepth = 1.3f, oceanFloorSmoothing = 1.3f, oceanDepthMultiplier = 0.5f;
     public boolean altPathing = false; // Renamed from static 'alt' for thread/save safety
     public int seed = 0;
-    private Vec3 tempVec3 = new Vec3();
     
     // Terrain Settings
     private final float noiseScale = 1f;
-    private final float waterOffset = 0.3f;
     private final boolean genLakes = false;
 
     // Craters
@@ -74,7 +71,7 @@ public class TestGenRefractored extends CaeBasicGenerator {
     private final ObjectSet<Block> tarBlocks = ObjectSet.with(CaeBlocks.lazurigrass);
 
     // Pre-allocated for ore generation to avoid recreating every gen
-    private final Seq<Block> basicOres = Seq.with(Blocks.oreCopper, Blocks.oreLead);
+    private final Seq<Block> basicOres = Seq.with(Blocks.oreCopper, Blocks.oreLead, CaeBlocks.caeruleumOre, CaeBlocks.virideaurumOre);
 
     // --- Noise & Height Logic ---
     @Override 

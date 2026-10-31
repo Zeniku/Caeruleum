@@ -8,7 +8,6 @@ import arc.math.geom.Geometry;
 import arc.math.geom.Point2;
 import arc.math.geom.Vec3;
 import arc.struct.FloatSeq;
-import arc.struct.GridBits;
 import arc.struct.IntSeq;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
@@ -17,7 +16,6 @@ import arc.util.Structs;
 import arc.util.noise.Ridged;
 import arc.util.noise.Simplex;
 import caeruleum.content.CaeBlocks;
-import caeruleum.maps.utils.managers.CaeChunkHandler;
 import mindustry.ai.BaseRegistry;
 import mindustry.content.Blocks;
 import mindustry.content.Liquids;
@@ -54,6 +52,7 @@ public class CaeMapUtilities {
             tile.setOverlay(ore);
         }
     }
+
     public void makeOrganicIsland(int cx, int cy, int baseRadius, Floor inner, Floor outer) {
         int padding = 15; // Extra space for the noise to push outward
         int maxRadius = baseRadius + padding;

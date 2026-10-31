@@ -4,8 +4,9 @@ import static mindustry.content.TechTree.*;
 
 public class CaeruleumTechTree {
     public static void load(){
-        CaePlanets.caeruleumPlanet.techTree = nodeRoot("caeruleum", CaeBlocks.miniCore, () -> {
+        CaePlanets.caeruleumPlanet.techTree = CaePlanets.die.techTree = nodeRoot("caeruleum", CaeBlocks.miniCore, () -> {
             node(CaeBlocks.lonsdaleiteDuct, () -> {
+                
                 node(CaeBlocks.drill1, () -> {
                     node(CaeBlocks.drill2, () -> {
                         node(CaeBlocks.drill3, () -> {
@@ -31,7 +32,7 @@ public class CaeruleumTechTree {
                         node(CaeBlocks.t2frac, () -> {
                             node(CaeBlocks.t3frac, () -> {
                                 node(CaeBlocks.t4frac, () -> {
-                            
+                                    
                                 }); 
                             }); 
                         });

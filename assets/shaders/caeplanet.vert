@@ -29,7 +29,7 @@ void main(){
 
 	vec3 norc = (u_ambientColor + specular) * (diffuse + vec3(clamp((dot(a_normal, u_lightdir) + 1.0) / 2.0, 0.0, 1.0)));
 
-	v_col = vec4(a_color.rgb, 1.0) * vec4(norc, 1.0);
+	v_col = vec4(a_color.rgb, 1.0) * vec4(norc, 0.7);
     // Pass the mesh UV through for the fragment shader to sample textures.
     v_dir = a_position.xyz;
     v_texCoords = a_texCoord0;

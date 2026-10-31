@@ -2,27 +2,41 @@ package caeruleum.maps.utils.managers;
 
 import java.util.Arrays;
 
+import arc.math.Mathf;
 import arc.math.Rand;
 import arc.math.geom.Vec3;
 import arc.struct.Seq;
-import arc.util.Log;
 import arc.util.noise.Simplex;
 import caeruleum.content.CaeBlocks;
 import caeruleum.maps.utils.CaeBasicGenerator;
 import caeruleum.maps.utils.CaeChunk;
 import caeruleum.maps.utils.CaeMapUtilities;
+import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.Tiles;
 import arc.struct.IntQueue;
+import arc.struct.ObjectMap;
 
 
 public class ForestManager{
     private CaeMapUtilities utils;
     private CaeBasicGenerator gen;
+    public Block[] blocks = {
+        CaeBlocks.blueTree,
+        CaeBlocks.blueFlower,
+        CaeBlocks.bush,
+        CaeBlocks.blueTendrils,
+    }; 
+    public ObjectMap<Block, Block> variants = ObjectMap.of(
+        CaeBlocks.blueTree, CaeBlocks.blueTreeDead
+    );
 
     public ForestManager(CaeBasicGenerator gen, CaeMapUtilities utils) {
         this.gen = gen;
         this.utils = utils;
+    }
+    public void setBlocks(Block[] blocks) {
+        this.blocks = blocks;
     }
 
     public void generateHybridForest(CaeChunkHandler handler) {
@@ -114,18 +128,23 @@ public class ForestManager{
 
                 float threshold = 1f - combinedDensity;
 
+
                 // Core trees (dense center of groves + dense wall hugs)
                 if (detailNoise > threshold) {
-                    if (x % 2 == 0 && y % 2 == 0) { // Keep walkable
-                        tile.setBlock(CaeBlocks.blueTree);
+                    if (x % 4 == 0 && y % 4 == 0) {
+                        tile.setBlock(blocks[0]);
                     }
-                } 
+                }
                 // Scattered flora on outer boundaries
-                else if (detailNoise > threshold - 0.25f && rand.chance(0.20f)) {
-                    float roll = rand.random(1f);
-                    if (roll < 0.3f) tile.setBlock(CaeBlocks.blueTree);
-                    else if (roll < 0.6f) tile.setBlock(CaeBlocks.blueFlower);
-                    else tile.setBlock(CaeBlocks.blueTendrils);
+                else if (detailNoise > threshold - 0.25f && rand.chance(0.30f)) {
+                int index = Mathf.clamp((int) ((distanceToWall / maxFadeDistance) * blocks.length), 0, blocks.length - 1);
+                Block variant = variants.get(blocks[index]);
+
+                    if(rand.chance(0.5) && variant != null){
+                        tile.setBlock(variant);
+                    } else {
+                        tile.setBlock(blocks[index]);
+                    };
                 }
             });
         }

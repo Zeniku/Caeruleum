@@ -5,6 +5,8 @@ import caeruleum.entities.bullet.PortalBulletType;
 import caeruleum.world.blocks.defense.*;
 import caeruleum.world.blocks.storage.*;
 import caeruleum.world.blocks.defense.turrets.*;
+import caeruleum.world.blocks.environment.CaeTreeBlock;
+import caeruleum.world.blocks.environment.NonRandomBush;
 import mindustry.content.*;
 import mindustry.entities.bullet.ContinuousLaserBulletType;
 import mindustry.entities.pattern.ShootAlternate;
@@ -41,6 +43,7 @@ public class CaeBlocks {
     lonsdaleiteWall, lonsdaleiteWallLarge,
     //turrets
     t1frac, t2frac, t3frac, t4frac, heavenlyStrike,	
+
     t1ov, t2ov, t3ov, praefector,
     //defense
     statusEffectProjector, tesla,
@@ -53,15 +56,18 @@ public class CaeBlocks {
         bluonixite = new Floor("bluonixite-stone"){{
             variants = 4;
         }};
+
         bluonixiteWall = new StaticWall("bluonixite-wall"){{
             bluonixite.asFloor().wall = this;
             variants = 3;
             mapColor = Color.valueOf("43434F");
         }};
+
         bluonixiteBoulder = new Prop("bluonixite-boulder"){{
             variants = 2;
             bluonixite.asFloor().decoration = this;
         }};
+
         aquafluent = new Floor("aquafluent-water"){{
             speedMultiplier = 0.5f;
             variants = 0;
@@ -85,6 +91,7 @@ public class CaeBlocks {
             albedo = 0.9f;
             supportsOverlay = true;        
         }};
+
         bluonixiteWater = new ShallowLiquid("bluonixite-aquafluent-water"){{ 
             supportsOverlay = true;
             speedMultiplier = 0.8f;
@@ -99,17 +106,21 @@ public class CaeBlocks {
         lazurigrass = new Floor("lazurigrass"){{
             variants = 4;
         }};
-        blueTendrils = new OverlayFloor("blue-tendrils"){{
+
+        blueTendrils = new NonRandomBush("blue-tendrils"){{
             variants = 3;
         }};
-        blueFlower = new Seaweed("blue-flower"){{
+
+        blueFlower = new NonRandomBush("blue-flower"){{
             variants = 3;
             lazurigrass.asFloor().decoration = this;
         }};
-        bush = new Seaweed("bluBush"){{
+
+        bush = new NonRandomBush("bluBush"){{
             variants = 5;
         }};
-        blueTree = new TreeBlock("blue-tree"){{
+
+        blueTree = new CaeTreeBlock("blue-tree"){{
             variants = 3;
             breakable = true;
             alwaysReplace = true;
@@ -118,7 +129,8 @@ public class CaeBlocks {
             breakEffect = Fx.breakProp;
             breakSound = Sounds.rockBreak;
         }};
-        blueTreeDead = new TreeBlock("blue-tree-dead"){{
+
+        blueTreeDead = new CaeTreeBlock("blue-tree-dead"){{
             breakable = true;
             alwaysReplace = true;
             instantDeconstruct = true;
@@ -127,10 +139,12 @@ public class CaeBlocks {
             breakSound = Sounds.rockBreak;
             variants = 3;
         }};
+
         lazurigrassWall = new StaticWall("lazurigrass-wall"){{
             lazurigrass.asFloor().wall = this;
             variants = 3;
         }};
+
         caeruleumOre = new OreBlock("ore-caeruleum", CaeItems.caeruleum){{
             oreThreshold = 0.864f;
             oreScale = 24.904762f;
@@ -189,6 +203,7 @@ public class CaeBlocks {
 
 
         }};
+
         drill4 = new BurstDrill("boom-drill"){{
             size = 4;
             drillTime = 210f;
@@ -271,6 +286,7 @@ public class CaeBlocks {
             consumePower(0.2f);
             requirements(Category.turret, with(CaeItems.lonsdaleite, 5, CaeItems.virideaurum, 5));
         }};
+
         t2frac = new PowerTurret("t2frac"){{
             size = 2;
             shootType = CaeBullets.mediumSword;
@@ -279,6 +295,7 @@ public class CaeBlocks {
             consumePower(0.2f);
             requirements(Category.turret, with(CaeItems.lonsdaleite, 5, CaeItems.virideaurum, 5));
         }};
+        
         t3frac = new PowerTurret("t3frac"){{
             size = 3;
             shootType = new PortalBulletType(){{
@@ -386,5 +403,7 @@ public class CaeBlocks {
                 return true;
             }
         };
+
+
     }
 }
