@@ -9,6 +9,7 @@ import caeruleum.graphics.g3d.MeshData;
 import caeruleum.maps.planet.*;
 import mindustry.content.Planets;
 import mindustry.game.Team;
+import mindustry.graphics.Shaders;
 import mindustry.graphics.g3d.HexMesh;
 import mindustry.graphics.g3d.HexSkyMesh;
 import mindustry.graphics.g3d.MultiMesh;
@@ -26,8 +27,9 @@ public class CaePlanets {
             new HexMesh(this, 5),
             new CaeHexMesh(
                 new MeshData(this, CaeShaders.Tplanet, "caeruleum-aquafluent-water"){{
-                    divisions = 5;
-                }}
+                    divisions = 3;
+                }}, 
+                true
             )
         );
             cloudMeshLoader = () -> new MultiMesh(
@@ -64,8 +66,9 @@ public class CaePlanets {
             new HexMesh(this, 5),
             new CaeHexMesh(
                 new MeshData(this, CaeShaders.Tplanet, "caeruleum-aquafluent-water"){{
-                    divisions = 5;
-                }}
+                    divisions = 3;
+                }},
+                true
             )
         );
         cloudMeshLoader = () -> new MultiMesh(

@@ -7,6 +7,7 @@ import arc.graphics.g2d.TextureRegion;
 import arc.graphics.gl.Shader;
 import arc.math.geom.Vec3;
 import arc.util.Nullable;
+import caeruleum.graphics.CaeShaders.CaePlanetShader;
 import mindustry.graphics.g3d.HexMesher;
 import mindustry.type.Planet;
 import mindustry.content.Planets;
@@ -40,14 +41,22 @@ public class MeshData{
         this.shader = shader;
     };
 
-    public MeshData(Planet planet, Shader shader, TextureRegion texture) {
-        this(planet, null, shader, null, texture);
+    public MeshData(Planet planet, Shader shader, TextureRegion texture, boolean useGenerator) {
+        this(planet, useGenerator? planet.generator : null, shader, null, texture);
+    }
+    public MeshData(Planet planet, Shader shader, String texture, boolean useGenerator) {
+        this(planet, shader, Core.atlas.find(texture), useGenerator);
     }
     public MeshData(Planet planet, Shader shader, String texture) {
-        this(planet, shader, Core.atlas.find(texture));
+        this(planet, shader, Core.atlas.find(texture), false);
     }
+
+    
 
     public Mesh buildHex(){
         return CaeMeshBuilder.buildHex(this.mesher, this.divisions, this.radius, this.intensity);
-    };
+    }
+    public Mesh buildIco(){
+        return CaeMeshBuilder.buildSphere(this.mesher, this.divisions, this.radius, this.intensity);
+    }
 }

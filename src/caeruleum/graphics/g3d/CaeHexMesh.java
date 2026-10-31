@@ -22,11 +22,11 @@ public class CaeHexMesh extends HexMesh {
         super(planet, planet.generator, divisions, Shaders.planet);
     };
 
-    public CaeHexMesh(MeshData data){  
+    public CaeHexMesh(MeshData data, boolean ico){  
         this.data = data;   
         this.planet = data.planet; 
         this.shader = data.shader;
-        this.mesh = data.buildHex();
+        this.mesh = ico? data.buildIco() : data.buildHex();
         this.texture = data.texture;
     };
     

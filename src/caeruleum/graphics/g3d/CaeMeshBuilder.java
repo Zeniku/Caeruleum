@@ -7,6 +7,9 @@ import arc.graphics.VertexAttribute;
 import arc.math.geom.Icosphere;
 import arc.math.geom.MeshResult;
 import arc.math.geom.Vec3;
+import arc.struct.FloatSeq;
+import arc.struct.IntSeq;
+import arc.struct.LongMap;
 import arc.struct.Seq;
 import mindustry.graphics.g3d.HexMesher;
 import mindustry.graphics.g3d.MeshBuilder;
@@ -22,30 +25,210 @@ public class CaeMeshBuilder extends MeshBuilder {
       tmpHeights = new float[14580];
     }
 
-   public static Mesh buildIcosphere(int divisions, float radius) {
-      MeshResult result = Icosphere.create(divisions);
-      Mesh mesh = begin(result.vertices.size / 3, result.indices.size, false, false, false);
-      if (result.vertices.size >= 65535) {
-         throw new RuntimeException("Due to index size limits, only meshes with a maximum of 65535 vertices are supported. If you want more than that, make your own non-indexed mesh builder.");
-      } else {
-         float[] items = result.vertices.items;
+   public static Mesh buildIcosphere(int divisions, float radius){
+        MeshResult result = Icosphere.create(divisions);
 
-         for(int i = 0; i < result.vertices.size; ++i) {
+        Mesh mesh = begin(result.vertices.size / 3, result.indices.size, false, false, false);
+
+        if(result.vertices.size >= 65535) throw new RuntimeException("Due to index size limits, only meshes with a maximum of 65535 vertices are supported. If you want more than that, make your own non-indexed mesh builder.");
+
+        float[] items = result.vertices.items;
+        for(int i = 0; i < result.vertices.size; i ++){
             items[i] *= radius;
-         }
+        }
 
-         mesh.getVerticesBuffer().put(items, 0, result.vertices.size);
-         short[] indices = new short[result.indices.size];
+        mesh.getVerticesBuffer().put(items, 0, result.vertices.size);
 
-         for(int i = 0; i < result.indices.size; ++i) {
+        short[] indices = new short[result.indices.size];
+        for(int i = 0; i < result.indices.size; i++){
             indices[i] = (short)result.indices.items[i];
-         }
+        }
 
-         mesh.getIndicesBuffer().put(indices);
-         return end(mesh);
-      }
+        mesh.getIndicesBuffer().put(indices);
+
+        return end(mesh);
+    }
+
+    /**
+     * Builds a smooth icosphere with per-vertex colors and smooth normals.
+     * Unlike {@link #buildHex(HexMesher, int, float, float)}, this does not follow the hexagonal sector grid,
+     * so the resulting planet surface has no visible hexagonal divisions.
+     */
+    public static synchronized Mesh buildSphere(HexMesher mesher, int divisions, float radius, float intensity){
+        MeshResult result = Icosphere.create(divisions);
+
+        //Icosphere does not share vertices between subdivided faces, so merge duplicates to get seamless normals
+        FloatSeq vertices = new FloatSeq(result.vertices.size);
+        IntSeq triangleIndices = new IntSeq(result.indices.size);
+        LongMap<Integer> vertexIndices = new LongMap<>();
+
+        for(int i = 0; i < result.indices.size; i++){
+            int raw = result.indices.get(i);
+            float x = result.vertices.get(raw * 3), y = result.vertices.get(raw * 3 + 1), z = result.vertices.get(raw * 3 + 2);
+
+            //quantize to avoid precision issues across face borders
+            int qx = Math.round((x + 1f) * 1048575f), qy = Math.round((y + 1f) * 1048575f), qz = Math.round((z + 1f) * 1048575f);
+            long key = ((long)qx << 42) | ((long)qy << 21) | qz;
+            Integer index = vertexIndices.get(key);
+
+            if(index == null){
+                index = vertices.size / 3;
+                vertexIndices.put(key, index);
+                vertices.add(x, y, z);
+            }
+
+            triangleIndices.add(index);
+        }
+
+        int vertexCount = vertices.size / 3;
+
+        if(vertexCount >= 65535) throw new RuntimeException("Due to index size limits, only meshes with a maximum of 65535 vertices are supported. If you want more than that, make your own non-indexed mesh builder.");
+
+        //TODO: this is NOT thread safe, but in practice, it should never cause a problem
+        if(mesher instanceof PlanetGenerator generator){
+            generator.seed = generator.baseSeed;
+        }
+
+        boolean emit = mesher.isEmissive();
+
+        float[] positions = new float[vertexCount * 3];
+        float[] normals = new float[vertexCount * 3];
+        boolean[] skipped = new boolean[vertexCount];
+
+        Vec3 pos = new Vec3(), nor = new Vec3(), center = new Vec3();
+
+        //displace vertices along their normals and cache the result
+        for(int i = 0; i < vertexCount; i++){
+            float x = vertices.get(i * 3), y = vertices.get(i * 3 + 1), z = vertices.get(i * 3 + 2);
+            pos.set(x, y, z);
+
+            float height = (1f + mesher.getHeight(pos) * intensity) * radius;
+
+            positions[i * 3] = x * height;
+            positions[i * 3 + 1] = y * height;
+            positions[i * 3 + 2] = z * height;
+
+            skipped[i] = mesher.skip(pos);
+        }
+
+        //calculate smooth normals by accumulating face normals
+        IntSeq keptIndices = new IntSeq(triangleIndices.size);
+
+        for(int i = 0; i < triangleIndices.size; i += 3){
+            int i1 = triangleIndices.get(i), i2 = triangleIndices.get(i + 1), i3 = triangleIndices.get(i + 2);
+
+            //omit fully-skipped triangles, which is used to cut holes in cloud meshes
+            if(skipped[i1] && skipped[i2] && skipped[i3]) continue;
+
+            float
+            x1 = positions[i1 * 3], y1 = positions[i1 * 3 + 1], z1 = positions[i1 * 3 + 2],
+            x2 = positions[i2 * 3], y2 = positions[i2 * 3 + 1], z2 = positions[i2 * 3 + 2],
+            x3 = positions[i3 * 3], y3 = positions[i3 * 3 + 1], z3 = positions[i3 * 3 + 2];
+
+            normal(x1, y1, z1, x2, y2, z2, x3, y3, z3, nor);
+
+            center.set((x1 + x2 + x3) / 3f, (y1 + y2 + y3) / 3f, (z1 + z2 + z3) / 3f);
+
+            //ensure the winding is outward-facing for backface culling
+            if(nor.dot(center) < 0f){
+                nor.scl(-1f);
+
+                int tmp = i2;
+                i2 = i3;
+                i3 = tmp;
+            }
+
+            normals[i1 * 3] += nor.x;
+            normals[i1 * 3 + 1] += nor.y;
+            normals[i1 * 3 + 2] += nor.z;
+
+            normals[i2 * 3] += nor.x;
+            normals[i2 * 3 + 1] += nor.y;
+            normals[i2 * 3 + 2] += nor.z;
+
+            normals[i3 * 3] += nor.x;
+            normals[i3 * 3 + 1] += nor.y;
+            normals[i3 * 3 + 2] += nor.z;
+
+            keptIndices.add(i1, i2, i3);
+        }
+
+        for(int i = 0; i < vertexCount; i++){
+            nor.set(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+
+            if(nor.len2() > 0f){
+                nor.nor();
+            }else{
+                nor.set(vertices.get(i * 3), vertices.get(i * 3 + 1), vertices.get(i * 3 + 2)).nor();
+            }
+
+            normals[i * 3] = nor.x;
+            normals[i * 3 + 1] = nor.y;
+            normals[i * 3 + 2] = nor.z;
+        }
+
+        Mesh mesh = begin(vertexCount, keptIndices.size, true, emit);
+
+        float[] floats = new float[3 + (packNormals ? 1 : 3) + 1 + (emit ? 1 : 0)];
+        Color tmpCol = new Color();
+
+        for(int i = 0; i < vertexCount; i++){
+            pos.set(vertices.get(i * 3), vertices.get(i * 3 + 1), vertices.get(i * 3 + 2));
+
+            tmpCol.set(1f, 1f, 1f, 1f);
+            mesher.getColor(pos, tmpCol);
+            float color = tmpCol.toFloatBits();
+
+            float emissive = 0f;
+
+            if(emit){
+                tmpCol.set(0f, 0f, 0f, 0f);
+                mesher.getEmissiveColor(pos, tmpCol);
+                emissive = tmpCol.toFloatBits();
+            }
+
+            nor.set(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+            vert(mesh, floats, positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], nor, color, emissive);
+        }
+
+        short[] indices = new short[keptIndices.size];
+        for(int i = 0; i < keptIndices.size; i++){
+            indices[i] = (short)keptIndices.get(i);
+        }
+
+        mesh.getIndicesBuffer().put(indices);
+
+        return end(mesh);
+    }
+    private static void verts(Mesh mesh, float[] floats, Vec3 a, float h1, Vec3 b, float h2, Vec3 c, float h3, Vec3 normal, float color, float emissive) {
+      vert(mesh, floats, a.x * h1, a.y * h1, a.z * h1, normal, color, emissive);
+      vert(mesh, floats, b.x * h2, b.y * h2, b.z * h2, normal, color, emissive);
+      vert(mesh, floats, c.x * h3, c.y * h3, c.z * h3, normal, color, emissive);
    }
 
+   private static void vert(Mesh mesh, float[] floats, float x, float y, float z, Vec3 normal, float color, float emissive) {
+      floats[0] = x;
+      floats[1] = y;
+      floats[2] = z;
+      if (packNormals) {
+         floats[3] = packNormals(normal.x, normal.y, normal.z);
+         floats[4] = color;
+         if (floats.length > 5) {
+            floats[5] = emissive;
+         }
+      } else {
+         floats[3] = normal.x;
+         floats[4] = normal.y;
+         floats[5] = normal.z;
+         floats[6] = color;
+         if (floats.length > 7) {
+            floats[7] = emissive;
+         }
+      }
+
+      mesh.getVerticesBuffer().put(floats);
+   }
+   
     public static Mesh buildPlanetGrid(PlanetGrid grid, Color color, float scale) {
       Mesh mesh = begin(grid.tiles.length * 12, 0, false, false);
       float col = color.toFloatBits();
