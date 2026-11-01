@@ -4,15 +4,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.EnumMap;
-import java.util.zip.DataFormatException;
 
 import arc.func.Boolf;
 import arc.func.Cons;
-import arc.func.Intc2;
 import arc.math.Mathf;
 import arc.math.geom.Vec3;
 import arc.struct.Seq;
-import arc.util.Log;
 import arc.util.Nullable;
 import caeruleum.content.CaeBlocks;
 import caeruleum.maps.utils.CaeBasicGenerator;
@@ -22,7 +19,6 @@ import mindustry.content.Blocks;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.Tiles;
-import mindustry.world.blocks.environment.Floor;
 
 public class CaeChunkHandler {
     public static CaeChunkHandler current;

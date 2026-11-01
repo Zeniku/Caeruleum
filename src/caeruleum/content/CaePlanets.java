@@ -19,18 +19,20 @@ import mindustry.type.Planet;
 
 public class CaePlanets {
     public static Planet caeruleumPlanet, die, dient;
-    
+    public static MeshData oceanMeshData, caeMeshData;
+
     public static void load(){
+        caeMeshData = new MeshData(Planets.sun, Shaders.planet, ""){{
+            divisions = 5;
+        }};
+        oceanMeshData = new MeshData(Planets.sun, CaeShaders.Tplanet, "caeruleum-aquafluent-water"){{
+            divisions = 3;
+        }};
         caeruleumPlanet = new Planet("caeruleum", Planets.sun, 1f, 2){{
             generator = new TestGenRefractored();
             meshLoader = () -> new MultiMesh(
             new HexMesh(this, 5),
-            new CaeHexMesh(
-                new MeshData(this, CaeShaders.Tplanet, "caeruleum-aquafluent-water"){{
-                    divisions = 3;
-                }}, 
-                true
-            )
+            new CaeHexMesh(oceanMeshData, true)
         );
             cloudMeshLoader = () -> new MultiMesh(
                     new HexSkyMesh(this, 15, 0.25f, 0.13f, 5, new Color().set(Color.valueOf("363f9a")).mul(0.9f).a(0.75f), 2, 0.45f, 0.9f, 0.38f),
@@ -64,12 +66,7 @@ public class CaePlanets {
         generator = new TestGenRefractored();
         meshLoader = () -> new MultiMesh(
             new HexMesh(this, 5),
-            new CaeHexMesh(
-                new MeshData(this, CaeShaders.Tplanet, "caeruleum-aquafluent-water"){{
-                    divisions = 3;
-                }},
-                true
-            )
+            new CaeHexMesh(oceanMeshData, true)
         );
         cloudMeshLoader = () -> new MultiMesh(
                     new HexSkyMesh(this, 15, 0.25f, 0.13f, 5, new Color().set(Color.valueOf("363f9a")).mul(0.9f).a(0.75f), 2, 0.45f, 0.9f, 0.38f),

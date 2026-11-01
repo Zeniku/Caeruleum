@@ -27,7 +27,6 @@ public class CaeTreeBlock extends Block {
     public float canopyParallax = 2f;     // multiplier of parallax
     public float depthScale = 0.5f;       // perspective zoom strength
     public TextureRegion canopyRegion;    // optional upper layer
-
     
     // fade settings
     public boolean fadeEnabled = true;
