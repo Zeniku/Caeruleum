@@ -288,9 +288,6 @@ private Floor getRiverFloor(Block currentFloor, boolean isDeep) {
         });
     }
 
-    /**
-     * Determines whether a tile is a candidate for water smoothing/deepening.
-     */
     private boolean shouldProcessWater(Floor floor, boolean navalMode) {
         if (!floor.isLiquid) return false;
 
@@ -303,9 +300,6 @@ private Floor getRiverFloor(Block currentFloor, boolean isDeep) {
         }
     }
 
-    /**
-     * Checks if any tile within deepRadius violates the depth condition.
-     */
     private boolean hasNearbyBoundary(int x, int y, int radius, int radiusSq, boolean navalMode) {
         for (int cx = -radius; cx <= radius; cx++) {
             for (int cy = -radius; cy <= radius; cy++) {
@@ -329,10 +323,6 @@ private Floor getRiverFloor(Block currentFloor, boolean isDeep) {
         return false;
     }
 
-    /**
-     * Maps existing shallow/mid water floors to their upgraded deeper counterparts.
-     * Modify or add custom floor conversions here easily!
-     */
     private Floor getUpgradedWaterFloor(Block currentFloor, boolean navalMode) {
         if (navalMode) {
             // Upgrade to deep water variants

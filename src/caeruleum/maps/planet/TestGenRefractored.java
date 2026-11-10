@@ -53,10 +53,10 @@ public class TestGenRefractored extends CaeBasicGenerator {
         {CaeBlocks.deepAquafluent, CaeBlocks.deepAquafluent, CaeBlocks.aquafluent},
         // Shore
         {CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.aquafluent, CaeBlocks.bluonixiteWater},
-        {CaeBlocks.bluonixite, CaeBlocks.lazurigrass},
-        {CaeBlocks.lazurigrass, Blocks.iceSnow},
+        {CaeBlocks.bluonixite, CaeBlocks.lazurigrassDark},
+        {CaeBlocks.lazurigrassDark, Blocks.iceSnow},
         // Peaks
-        {Blocks.iceSnow, Blocks.snow, Blocks.ice}
+        {Blocks.iceSnow, Blocks.snow, CaeBlocks.ice}
     };
 
     private final Block[] craterTerrain = {
@@ -166,6 +166,7 @@ public class TestGenRefractored extends CaeBasicGenerator {
         if (Ridged.noise3d(seed + 1, position.x, position.y, position.z, 2, 22) > 0.31) {
             tile.block = Blocks.air;
         }
+
     }
 
     @Override
@@ -197,7 +198,7 @@ public class TestGenRefractored extends CaeBasicGenerator {
         int oceanChunksCount = oceanChunks.size;
         int landChunksCount = landChunks.size;
 
-        roomHandler.makeRooms(rand.random(5, 7), oceanChunks, landChunks, (float) (chunkHandler.chunks.length * chunkHandler.chunks[0].length));
+        roomHandler.makeRooms(rand.random(5, 7), oceanChunks, landChunks, (float) (chunkHandler.chunkCols * chunkHandler.chunkRows));
         roomHandler.makeSpawn();
 
         cells(1);

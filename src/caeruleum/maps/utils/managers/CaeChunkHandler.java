@@ -22,11 +22,15 @@ import mindustry.world.Tiles;
 
 public class CaeChunkHandler {
     public static CaeChunkHandler current;
-    public CaeChunk[][] chunks;
+    public static int VERSION = 2;
+    public CaeChunk[] chunks;
+
     private @Nullable CaeMapUtilities utils;
     private @Nullable CaeBasicGenerator gen;
+
     private final EnumMap<CaeChunk.Biome, Seq<CaeChunk>> chunksByType = new EnumMap<>(CaeChunk.Biome.class);
-    public int mapWidth, mapHeight, chunkSize;
+    
+    public int mapWidth, mapHeight, chunkSize, chunkCols, chunkRows;
     // Initialize a Seq for every enum value so they are never null
     {
         for (CaeChunk.Biome type : CaeChunk.Biome.values()) {
@@ -47,10 +51,11 @@ public class CaeChunkHandler {
         this.mapHeight = height;
         for(Seq<CaeChunk> s : chunksByType.values()) s.clear();
         // 1. Calculate grid size using ceiling division to ensure remaining space gets a chunk
-        int chunkCols = (width + chunkSize - 1) / chunkSize;
-        int chunkRows = (height + chunkSize - 1) / chunkSize;
+        chunkCols = (width + chunkSize - 1) / chunkSize;
+        chunkRows = (height + chunkSize - 1) / chunkSize;
         
-        chunks = new CaeChunk[chunkCols][chunkRows];
+        chunks = new CaeChunk[chunkCols * chunkRows];
+        Tiles tiles = gen.getTiles();
 
         for(int x = 0; x < chunkCols; x++){
             for(int y = 0; y < chunkRows; y++){
@@ -63,11 +68,10 @@ public class CaeChunkHandler {
 
                 
                 CaeChunk chunk = new CaeChunk(startX, startY, actualChunkWidth, actualChunkHeight, gen);
-                CaeChunk.Biome biome = sampleChunkBiome(gen.getTiles(), chunk);
+                CaeChunk.Biome biome = sampleChunkBiome(tiles, chunk);
                 chunk.biome = biome;
                 chunksByType.get(biome).add(chunk);
-                
-                chunks[x][y] = chunk;
+                chunks[y * chunkCols + x] = chunk;
             }
         }
 
@@ -82,22 +86,11 @@ public class CaeChunkHandler {
      * @return The CaeChunk containing the tile, or null if out of map bounds.
      */
     public CaeChunk getChunkAt(int worldX, int worldY) {
-        if (chunks == null || chunks.length == 0 || chunks[0].length == 0) return null;
-
-        // 1. Boundary check against map dimensions
-        if (worldX < 0 || worldX >= mapWidth || worldY < 0 || worldY >= mapHeight) {
+        if (chunks == null || worldX < 0 || worldX >= mapWidth || worldY < 0 || worldY >= mapHeight) {
             return null;
         }
-
-        // 2. Direct O(1) floor division translation
-        int cX = worldX / chunkSize;
-        int cY = worldY / chunkSize;
-
-        // 3. Safety clamp against array bounds (handles edge case where worldX == mapW)
-        cX = Mathf.clamp(cX, 0, chunks.length - 1);
-        cY = Mathf.clamp(cY, 0, chunks[0].length - 1);
-
-        return chunks[cX][cY];
+        
+        return chunks[(int) (worldX / chunkSize) + ((worldY / chunkSize) * chunkCols)];
     }
     public void setBiome(CaeChunk chunk, CaeChunk.Biome biome){
         if(chunk.biome == biome) return;
@@ -107,27 +100,28 @@ public class CaeChunkHandler {
         updateOceanInfluence();
     }
     public void save(DataOutput out) throws IOException {
-        for(CaeChunk[] collum : chunks){
-            for(CaeChunk chunk : collum){
-                out.writeByte(chunk.biome.ordinal());
-            }
+        for(CaeChunk chunk : chunks){
+            out.writeByte(chunk.biome.ordinal());
         }
     }
-    public static CaeChunkHandler load(int mapW, int mapH, int chunkSize, DataInput in) throws IOException {
+    public static CaeChunkHandler load(int version, int mapW, int mapH, int chunkSize, DataInput in) throws IOException {
+        if(version > VERSION) throw new IOException("ChunkData is from a newer CaeChunkHandler version:" + version + "current Version:" + VERSION);
         CaeChunkHandler h = new CaeChunkHandler(null, null);
         h.mapWidth = mapW; h.mapHeight = mapH; h.chunkSize = chunkSize;
         int cols = (mapW + chunkSize - 1) / chunkSize;
         int rows = (mapH + chunkSize - 1) / chunkSize;
-        h.chunks = new CaeChunk[cols][rows];
-        for (int x = 0; x < cols; x++) {
-            for (int y = 0; y < rows; y++) {
+        h.chunks = new CaeChunk[cols * rows];
+        h.chunkCols = cols; h.chunkRows = rows;
+        for (int i = 0; i < cols * rows; i++) {
+        
+            int x = version == 1 ? i/rows : i % cols;
+            int y = version == 1 ? i% rows : i / cols;
                 int sx = x * chunkSize, sy = y * chunkSize;
                 CaeChunk c = new CaeChunk(sx, sy,
                     Math.min(chunkSize, mapW - sx), Math.min(chunkSize, mapH - sy), null);
                 c.biome = CaeChunk.Biome.values()[in.readByte()];
                 h.chunksByType.get(c.biome).add(c);
-                h.chunks[x][y] = c;
-            }
+                h.chunks[y * cols + x] = c;
         }
         h.updateOceanInfluence();
         return h;
@@ -139,7 +133,7 @@ public CaeChunk.Biome getBlockBiome(Block floor) {
         floor == CaeBlocks.deepAquafluent || floor == CaeBlocks.bluonixiteWater) {
         return CaeChunk.Biome.OCEAN;
     }
-    if (floor == CaeBlocks.lazurigrass) {
+    if (floor == CaeBlocks.lazurigrass || floor == CaeBlocks.lazurigrassDark) {
         return CaeChunk.Biome.FOREST;
     }
     if (floor == Blocks.stone || floor == CaeBlocks.bluonixite || 
@@ -198,29 +192,23 @@ private CaeChunk.Biome sampleChunkBiome(Tiles tiles, CaeChunk chunk) {
     return dominantBiome;
 }
 
-    public void updateOceanInfluence() {
-        int cols = chunks.length;
-        int rows = chunks[0].length;
+    public void updateOceanInfluence(){
+        for(int y = 0; y < chunkRows; y++){
+            for(int x = 0; x < chunkCols; x++){
+                CaeChunk c = chunks[x + y * chunkCols];
+                if(c.biome == CaeChunk.Biome.OCEAN){ c.oceanInfluence = 1f; continue; }
 
-        for (int x = 0; x < cols; x++) {
-            for (int y = 0; y < rows; y++) {
-                if (chunks[x][y].biome == CaeChunk.Biome.OCEAN) {
-                    chunks[x][y].oceanInfluence = 1f;
-                    continue;
-                }
-
-                int oceanNeighbors = 0;
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dy = -1; dy <= 1; dy++) {
+                int n = 0;
+                for(int dy = -1; dy <= 1; dy++){
+                    int ny = y + dy;
+                    if(ny < 0 || ny >= chunkRows) continue;
+                    for(int dx = -1; dx <= 1; dx++){
                         int nx = x + dx;
-                        int ny = y + dy;
-                        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-                            if (chunks[nx][ny].biome == CaeChunk.Biome.OCEAN) oceanNeighbors++;
-                        }
+                        if(nx < 0 || nx >= chunkCols) continue;
+                        if(chunks[nx + ny * chunkCols].biome == CaeChunk.Biome.OCEAN) n++;
                     }
                 }
-                // 8 neighbors -> 0.0 to 1.0 influence
-                chunks[x][y].oceanInfluence = oceanNeighbors / 8f; 
+                c.oceanInfluence = n / 8f;
             }
         }
     }
@@ -248,13 +236,10 @@ private CaeChunk.Biome sampleChunkBiome(Tiles tiles, CaeChunk chunk) {
 
     /** Directly iterates over filtered chunks without building an intermediary list */
     public void each(Boolf<CaeChunk> filter, Cons<CaeChunk> action) {
-        for (int x = 0; x < chunks.length; x++) {
-            for (int y = 0; y < chunks[0].length; y++) {
-                CaeChunk chunk = chunks[x][y];
+        for (CaeChunk chunk : chunks) {
                 if (filter.get(chunk)) {
                     action.get(chunk);
                 }
             }
         }
-    }
 }

@@ -6,7 +6,26 @@ public class CaeruleumTechTree {
     public static void load(){
         CaePlanets.caeruleumPlanet.techTree = CaePlanets.die.techTree = nodeRoot("caeruleum", CaeBlocks.miniCore, () -> {
             node(CaeBlocks.lonsdaleiteDuct, () -> {
-                
+
+                node(CaeBlocks.lonsdaleiteJunction, () -> {
+                    node(CaeBlocks.lonsdaleiteDuctRouter, () -> {
+                        node(CaeBlocks.lonsdaleiteBridge, () -> {
+
+                        });
+                        node(CaeBlocks.lonsdaleiteSorter, () -> {
+                            node(CaeBlocks.lonsdaleiteInvertedSorter, () -> {
+
+                            });
+                        });
+
+                        node(CaeBlocks.lonsdaleiteOverflow, () -> {
+                            node(CaeBlocks.lonsdaleiteUnderflow, () -> {
+
+                            });
+                        });
+                    });
+                });
+
                 node(CaeBlocks.drill1, () -> {
                     node(CaeBlocks.drill2, () -> {
                         node(CaeBlocks.drill3, () -> {

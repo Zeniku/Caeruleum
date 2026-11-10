@@ -60,7 +60,7 @@ public class RoomHandler {
                 CaeChunk.Biome.PLAINS
             );
             
-            makeRooms(amount, oceanChunks, landChunks, (float) (chunkHandler.chunks.length * chunkHandler.chunks[0].length));
+            makeRooms(amount, oceanChunks, landChunks, (float) (chunkHandler.chunkCols * chunkHandler.chunkRows));
         }
         
         public void makeRooms(int amount, Seq<CaeChunk> oceanChunks, Seq<CaeChunk> landChunks, float totalChunks) {

@@ -3,6 +3,7 @@ package caeruleum.world.blocks.storage;
 import mindustry.content.Fx;
 import mindustry.entities.Effect;
 import mindustry.gen.Building;
+import mindustry.gen.PowerGraphUpdaterc;
 import mindustry.ui.Bar;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.meta.Attribute;

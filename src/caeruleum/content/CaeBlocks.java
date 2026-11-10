@@ -19,8 +19,8 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.defense.turrets.PowerTurret;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.production.*;
+import mindustry.world.blocks.storage.Unloader;
 import mindustry.world.blocks.environment.*;
-import mindustry.world.blocks.production.GenericCrafter;
 import mindustry.world.draw.DrawFrames;
 import mindustry.graphics.CacheLayer;
 import mindustry.graphics.Pal;
@@ -30,13 +30,24 @@ import static mindustry.type.ItemStack.*;
 
 public class CaeBlocks { 
     public static Block 
-    bluonixite, bluonixiteWall, bluonixiteBoulder, bluonixiteWater, lazurigrass, lazurigrassWall, 
+    bluonixite, bluonixiteLight, bluonixiteRough, bluonixiteWall, bluonixiteBoulder,
+    
+    bluonixiteCrater, bluonixiteCraterWall, bluonixiteCraterRooted, bluonixiteCraterLeaves, 
+    bluonixiteWater,
+    
+    lazurigrass, lazurigrassLight, lazurigrassRough, lazurigrassDark, lazurigrassWall, lazurigrassDarkWall,
+    ice, iceWall,
     
     aquafluent, deepAquafluent,
     bush, blueFlower, blueTendrils, blueTree, blueTreeDead,
-    caeruleumOre, rubrariumOre, virideaurumOre,
+
+    caeruleumOre, 
+    rubrariumOre, rubrariumOreWall, rubrariumOreRooted, rubrariumOreLeaves,
+
+    virideaurumOre,
     //distribution
-    lonsdaleiteDuct,
+    lonsdaleiteDuct, lonsdaleiteDuctRouter, lonsdaleiteJunction, lonsdaleiteUnderflow, lonsdaleiteOverflow, lonsdaleiteBridge,
+    lonsdaleiteSorter, lonsdaleiteInvertedSorter, lonsdaleiteUnloader,
     //drils
     drill1, drill2, drill3, drill4,
     //walls
@@ -57,15 +68,51 @@ public class CaeBlocks {
             variants = 4;
         }};
 
-        bluonixiteWall = new StaticWall("bluonixite-wall"){{
-            bluonixite.asFloor().wall = this;
-            variants = 3;
-            mapColor = Color.valueOf("43434F");
+        bluonixiteRough = new Floor("bluonixite-stone-rough"){{
+            variants = 4;
+        }};
+
+        bluonixiteLight = new Floor("bluonixite-stone-light"){{
+            variants = 4;
         }};
 
         bluonixiteBoulder = new Prop("bluonixite-boulder"){{
             variants = 2;
             bluonixite.asFloor().decoration = this;
+        }};
+
+        bluonixiteCrater = new Floor("bluonixite-crater"){{
+            variants = 6;
+        }};
+        
+        bluonixiteWall = new StaticWall("bluonixite-wall"){{
+            bluonixite.asFloor().wall = this;
+            bluonixiteLight.asFloor().wall = this;
+            bluonixiteRough.asFloor().wall = this;
+            variants = 3;
+            mapColor = Color.valueOf("43434F");
+        }};
+
+        bluonixiteCrater = new StaticWall("bluonixite-crater-wall"){{
+            bluonixiteCrater.asFloor().wall = this;
+            variants = 3;
+        }};
+
+        bluonixiteCraterLeaves = new StaticWall("bluonixite-crater-wall-leaves"){{
+            variants = 3;
+        }};
+
+        bluonixiteCraterRooted = new StaticWall("bluonixite-crater-wall-rooted"){{
+            variants = 3;
+        }};
+
+        ice = new Floor("aquafluent-ice"){{
+            variants = 4;
+        }};
+
+        iceWall = new StaticWall("aquafluent-ice-wall"){{
+            ice.asFloor().wall = this;
+            variants = 3;
         }};
 
         aquafluent = new Floor("aquafluent-water"){{
@@ -78,6 +125,7 @@ public class CaeBlocks {
             cacheLayer = CacheLayer.water;
             albedo = 0.9f;
         }};
+
         deepAquafluent = new Floor("aquafluent-deep-water"){{
             speedMultiplier = 0.2f;
             variants = 0;
@@ -104,6 +152,18 @@ public class CaeBlocks {
         ((ShallowLiquid)bluonixiteWater).set(aquafluent, bluonixite);
 
         lazurigrass = new Floor("lazurigrass"){{
+            variants = 4;
+        }};
+
+        lazurigrassLight = new Floor("lazurigrass-light"){{
+            variants = 4;
+        }};
+
+        lazurigrassRough = new Floor("lazurigrass-rough"){{
+            variants = 4;
+        }};
+        
+        lazurigrassDark = new Floor("lazurigrass-dark"){{
             variants = 4;
         }};
 
@@ -141,29 +201,142 @@ public class CaeBlocks {
         }};
 
         lazurigrassWall = new StaticWall("lazurigrass-wall"){{
+            lazurigrassLight.asFloor().wall = this;
             lazurigrass.asFloor().wall = this;
+            lazurigrassRough.asFloor().wall = this;
+            variants = 3;
+        }};
+        
+        lazurigrassDarkWall = new StaticWall("lazurigrass-dark-wall"){{
+            lazurigrassDark.asFloor().wall = this;
             variants = 3;
         }};
 
-        caeruleumOre = new OreBlock("ore-caeruleum", CaeItems.caeruleum){{
+        caeruleumOre = new OreBlock("ore-caeruleum", CaeItems.caeruleum){{    
             oreThreshold = 0.864f;
             oreScale = 24.904762f;
-
         }};
+
         rubrariumOre = new OreBlock("ore-rubrarium", CaeItems.rubrarium){{
             oreThreshold = 0.864f;
             oreScale = 24.004762f;
         }};
+
+        rubrariumOreWall = new OreBlock("ore-rubrarium-wall", CaeItems.rubrarium){{
+            oreThreshold = 0.864f;
+            oreScale = 24.004762f;
+            wallOre = true;
+        }};
+
+        rubrariumOreWall = new OreBlock("ore-rubrarium-wall-rooted", CaeItems.rubrarium){{
+            oreThreshold = 0.864f;
+            oreScale = 24.004762f;
+            wallOre = true;
+        }};
+
+        rubrariumOreWall = new OreBlock("ore-rubrarium-wall-leaves", CaeItems.rubrarium){{
+            oreThreshold = 0.864f;
+            oreScale = 24.004762f;
+            wallOre = true;
+        }};
+
         virideaurumOre = new OreBlock("ore-virideaurum", CaeItems.virideaurum){{
             oreThreshold = 0.853f;
             oreScale = 24.004762f;
         }};
-
-        lonsdaleiteDuct = new Duct("lonsdaleiteDuct"){{
+        
+        lonsdaleiteBridge = new DuctBridge("lonsdaleite-bridge"){{
+            health = 90;
             hasPower = true;
             consumesPower = true;
             conductivePower = true;
             speed = 4f;
+            range = 5;
+            crushFragile = true;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+        
+        
+        lonsdaleiteDuctRouter = new Router("lonsdaleite-duct-router"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            speed = 4f;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        lonsdaleiteJunction = new Junction("lonsdaleite-junction"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            speed = 4f;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        lonsdaleiteDuct = new Duct("lonsdaleiteDuct"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            speed = 4f;
+            bridgeReplacement = lonsdaleiteBridge;
+            junctionReplacement = lonsdaleiteJunction;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        lonsdaleiteOverflow = new OverflowGate("lonsdaleite-overflow-gate"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            speed = 4f;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        lonsdaleiteUnderflow = new OverflowGate("lonsdaleite-underflow-gate"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            speed = 4f;
+            invert = true;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        
+        lonsdaleiteSorter = new Sorter("lonsdaleite-sorter"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        lonsdaleiteInvertedSorter = new Sorter("lonsdaleite-inverted-sorter"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            invert = true;
+
+            requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
+        }};
+
+        lonsdaleiteUnloader = new Unloader("lonsdaleite-unloader"){{
+            health = 90;
+            hasPower = true;
+            consumesPower = true;
+            conductivePower = true;
+            speed = 60f / 11f;
 
             requirements(Category.distribution, with(CaeItems.lonsdaleite, 1f));
         }};

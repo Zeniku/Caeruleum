@@ -21,12 +21,14 @@ import arc.struct.ObjectMap;
 public class ForestManager{
     private CaeMapUtilities utils;
     private CaeBasicGenerator gen;
+    
     public Block[] blocks = {
         CaeBlocks.blueTree,
         CaeBlocks.blueFlower,
         CaeBlocks.bush,
         CaeBlocks.blueTendrils,
     }; 
+
     public ObjectMap<Block, Block> variants = ObjectMap.of(
         CaeBlocks.blueTree, CaeBlocks.blueTreeDead
     );
@@ -100,7 +102,7 @@ public class ForestManager{
             chunk.pass((x, y) -> {
                 Tile tile = tiles.get(x, y);
 
-                if (tile == null || tile.floor() != CaeBlocks.lazurigrass || !tile.block().isAir()) {
+                if (tile == null || (tile.floor() != CaeBlocks.lazurigrass && tile.floor() != CaeBlocks.lazurigrassDark) || !tile.block().isAir()) {
                     return; // Skips to the next coordinate (acts like continue)
                 }
 

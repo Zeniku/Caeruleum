@@ -55,14 +55,14 @@ public class CaeruleumMod extends Mod{
         SaveVersion.addCustomChunk("caeruleum-chunks", new SaveFileReader.CustomChunk(){
         public void write(DataOutput out) throws IOException {
             CaeChunkHandler h = CaeChunkHandler.current;
-            out.writeByte(1); // format version
+            out.writeByte(CaeChunkHandler.VERSION); // format version
             out.writeShort(h.mapWidth); out.writeShort(h.mapHeight); out.writeShort(h.chunkSize);
             h.save(out);
         }
         public void read(DataInput in) throws IOException {
             int version = in.readByte();
             int w = in.readShort(), h = in.readShort(), size = in.readShort();
-            CaeChunkHandler.current = CaeChunkHandler.load(w, h, size, in);
+            CaeChunkHandler.current = CaeChunkHandler.load(version, w, h, size, in);
         }
         public boolean shouldWrite() { return CaeChunkHandler.current != null; }
     });
@@ -77,14 +77,12 @@ public class CaeruleumMod extends Mod{
                 return;
             }
 
-            CaeChunk[][] chunks = CaeChunkHandler.current.chunks;
+            CaeChunk[] chunks = CaeChunkHandler.current.chunks;
 
             Draw.draw(Layer.overlayUI, () -> {
                 Lines.stroke(1.5f);
 
-                for (int x = 0; x < chunks.length; x++) {
-                    for (int y = 0; y < chunks[0].length; y++) {
-                        CaeChunk chunk = chunks[x][y];
+                for (CaeChunk chunk : chunks) {
                         if (chunk == null) continue;
 
                         // World pixel coordinates (1 tile = 8 pixels)
@@ -119,7 +117,6 @@ public class CaeruleumMod extends Mod{
                         
                         font.getData().setScale(1f); // Reset font scale
                     }
-                }
                 Draw.reset();
             });
         });
